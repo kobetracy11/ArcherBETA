@@ -147,7 +147,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </style>
 </head>
 <body>
- 
+
 <div class="header">
   <div class="header-top">
     <div class="logo">ARCHERBETA <span>RESTORATION</span></div>
@@ -164,7 +164,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <button class="filter-btn" onclick="setFilter('all',this)">All Jobs</button>
   </div>
 </div>
- 
+
 <div id="view-jobs">
   <div class="metrics" id="metrics">
     <div class="metric"><div class="metric-val val-blue">—</div><div class="metric-label">Open</div></div>
@@ -174,7 +174,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="sync-bar" id="sync-bar"><i class="ti ti-loader" style="font-size:13px"></i> Connecting…</div>
   <div id="list-wrap"></div>
 </div>
- 
+
 <div id="view-timecard" style="display:none"><div class="page-inner" id="tc-content"></div></div>
 <div id="view-employees" style="display:none">
   <div class="page-inner">
@@ -182,14 +182,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div id="emp-list"></div>
   </div>
 </div>
- 
+
 <div class="bottomnav">
   <div class="bnav-item active" id="nav-jobs" onclick="showView('jobs',this)"><i class="ti ti-clipboard-list"></i>Jobs</div>
   <div class="bnav-item" onclick="showView('timecard',this)"><i class="ti ti-clock"></i>Time Cards</div>
   <div class="bnav-item" onclick="showView('employees',this)"><i class="ti ti-users"></i>Employees</div>
   <div class="bnav-item" onclick="openNewModal()"><i class="ti ti-circle-plus"></i>New Job</div>
 </div>
- 
+
 <div class="sheet-overlay" id="sheet-overlay" onclick="sheetOutside(event)">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -208,7 +208,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="tab-body" id="tab-body"></div>
   </div>
 </div>
- 
+
 <!-- New Job Modal -->
 <div class="modal-overlay" id="new-modal" onclick="if(event.target===this)closeModal('new-modal')">
   <div class="modal">
@@ -234,7 +234,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 </div>
- 
+
 <!-- Add Employee Modal -->
 <div class="modal-overlay" id="emp-modal" onclick="if(event.target===this)closeModal('emp-modal')">
   <div class="modal">
@@ -251,7 +251,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 </div>
- 
+
 <!-- Clock Modal -->
 <div class="modal-overlay" id="clock-modal" onclick="if(event.target===this)closeModal('clock-modal')">
   <div class="modal">
@@ -273,26 +273,26 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
   </div>
 </div>
- 
+
 <div class="saving-toast" id="saving-toast">Saving…</div>
- 
+
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxzO1ttpZrgD_c7aVuDgG10xpPrxu90a7Md1DCOii94qFwPDmjkH_IN2n5pPLBvya-/exec';
 const DRIVE  = 'https://drive.google.com/drive/u/0/folders/1ZAtp4mCnBoc8yV6KUVkbitL0RAWI0Dyl';
 const PHOTOS = 'https://drive.google.com/drive/u/0/folders/1kFpeUpQHp_sjDSkk2ueWw7nCTnNKdCpS';
 const TODAY  = new Date(); TODAY.setHours(0,0,0,0);
- 
+
 const typeIcon  = {water:'ti-droplet',fire:'ti-flame',mold:'ti-leaf',storm:'ti-cloud-storm',other:'ti-tool'};
 const typeCls   = {water:'i-water',fire:'i-fire',mold:'i-mold',storm:'i-storm',other:'i-other'};
 const typeLabel = {water:'Water Damage',fire:'Fire Damage',mold:'Mold Remediation',storm:'Storm Damage',other:'Other'};
- 
+
 // ── STATE ──
 let sheetJobs=[], localJobs=[], currentFilter='open', activeJob=null;
 let jobNotes={}, jobChecklists={}, jobEstimates={}, jobContacts={};
 let employees=[], timeEntries=[];
 let nextId=10000, empNextId=1, tcNextId=1;
 let lastSync=null, saveTimer=null;
- 
+
 // ── HELPERS ──
 function guessType(n){n=n.toLowerCase();if(n.includes('roof')||n.includes('hail')||n.includes('storm'))return 'storm';if(n.includes('fire')||n.includes('smoke')||n.includes('lunchroom'))return 'fire';if(n.includes('mold'))return 'mold';return 'water';}
 function daysBetween(a,b){return Math.max(0,Math.round(Math.abs(new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5));}
@@ -306,7 +306,7 @@ function avatarBg(n){const c=['#E6F1FB','#E1F5EE','#FAEEDA','#FAECE7','#EAF3DE']
 function avatarFg(n){const c=['#185FA5','#0F6E56','#854F0B','#993C1D','#3B6D11'];return c[n.charCodeAt(0)%c.length];}
 function setSyncBadge(s){const b=document.getElementById('sync-badge');b.className='sync-badge';if(s==='live'){b.classList.add('sync-live');b.innerHTML='<i class="ti ti-circle-check" style="font-size:11px"></i> Live';}if(s==='error'){b.classList.add('sync-err');b.innerHTML='<i class="ti ti-alert-circle" style="font-size:11px"></i> Offline';}if(s==='loading'){b.classList.add('sync-loading');b.innerHTML='<i class="ti ti-refresh" style="font-size:11px"></i> Syncing';}}
 function showToast(msg){const t=document.getElementById('saving-toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
- 
+
 // ── API CALLS ──
 async function apiGet(action){
   const res=await fetch(SCRIPT_URL+'?action='+action,{method:'GET',mode:'cors'});
@@ -315,7 +315,7 @@ async function apiGet(action){
 async function apiPost(sheet,data){
   await fetch(SCRIPT_URL,{method:'POST',mode:'cors',body:JSON.stringify({action:'save',sheet,data})});
 }
- 
+
 // ── LOAD FROM SHEET ──
 async function refreshData(){
   setSyncBadge('loading');
@@ -335,7 +335,7 @@ async function refreshData(){
       // Notes
       jobNotes={};(data.Notes||[]).forEach(r=>{if(r[0])jobNotes[r[0]]=r[1]||'';});
       // Contacts
-      jobContacts={};(data.Contacts||[]).forEach(r=>{if(r[0])jobContacts[r[0]]={name:r[1]||'',phone:r[2]||'',email:r[3]||'',address:r[4]||'',agent:r[5]||'',claim:r[6]||''};});
+      jobContacts={};(data.Contacts||[]).forEach(r=>{if(r[0])jobContacts[r[0]]={name:r[1]||'',phone:r[2]||'',email:r[3]||'',address:r[4]||'',agent:r[5]||'',adjuster:r[6]||'',claim:r[7]||''};});
       // Checklists
       jobChecklists={};(data.Checklists||[]).forEach(r=>{if(!r[0])return;if(!jobChecklists[r[0]])jobChecklists[r[0]]=[];jobChecklists[r[0]].push({id:parseInt(r[1])||Date.now(),text:r[2]||'',done:r[3]==='TRUE'||r[3]===true||r[3]==='true'});});
       // Estimates
@@ -357,14 +357,14 @@ async function refreshData(){
   }
   renderJobs();
 }
- 
+
 // ── SAVE TO SHEET ──
 function scheduleSave(){
   showToast('Saving…');
   clearTimeout(saveTimer);
   saveTimer=setTimeout(saveAll,1500);
 }
- 
+
 async function saveAll(){
   try{
     // Employees
@@ -374,7 +374,7 @@ async function saveAll(){
     const notesData=[['jobId','notes'],...Object.entries(jobNotes).map(([k,v])=>[k,v])];
     await apiPost('Notes',notesData);
     // Contacts
-    const contactData=[['jobId','name','phone','email','address','agent','claim'],...Object.entries(jobContacts).map(([k,v])=>[k,v.name,v.phone,v.email,v.address,v.agent,v.claim])];
+    const contactData=[['jobId','name','phone','email','address','agent','adjuster','claim'],...Object.entries(jobContacts).map(([k,v])=>[k,v.name,v.phone,v.email,v.address,v.agent,v.adjuster||'',v.claim])];
     await apiPost('Contacts',contactData);
     // Checklists
     const checkData=[['jobId','id','text','done']];
@@ -393,7 +393,7 @@ async function saveAll(){
     showToast('Saved ✓');
   }catch(e){showToast('Save failed — check connection');}
 }
- 
+
 // ── SELECTS ──
 function populateSelects(){
   const empOpts=employees.length===0?'<option value="">— Add employees first —</option>':employees.map(e=>`<option>${e.name}</option>`).join('');
@@ -401,11 +401,11 @@ function populateSelects(){
   const ckJob=document.getElementById('ck-job');
   if(ckJob){ckJob.innerHTML='<option value="">— No specific job —</option>';getAllJobs().filter(j=>!j.closed).forEach(j=>{const o=document.createElement('option');o.value=j.name;o.textContent=j.name;ckJob.appendChild(o);});}
 }
- 
+
 // ── JOBS ──
 function getAllJobs(){return[...sheetJobs,...localJobs];}
 function getFiltered(){const all=getAllJobs();if(currentFilter==='open')return all.filter(j=>!j.closed);if(currentFilter==='closed')return all.filter(j=>j.closed);return all;}
- 
+
 function renderJobs(){
   const all=getAllJobs();
   const open=all.filter(j=>!j.closed).length;
@@ -444,9 +444,9 @@ function renderJobs(){
     </div>`;
   }).join('')+'</div>';
 }
- 
+
 function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderJobs();}
- 
+
 function openJobSheet(id){
   activeJob=getAllJobs().find(j=>j.id===id);
   if(!activeJob)return;
@@ -458,7 +458,7 @@ function openJobSheet(id){
 }
 function closeSheet(){document.getElementById('sheet-overlay').classList.remove('open');}
 function sheetOutside(e){if(e.target===document.getElementById('sheet-overlay'))closeSheet();}
- 
+
 function switchJobTab(tab,el){
   document.querySelectorAll('.job-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
@@ -466,7 +466,7 @@ function switchJobTab(tab,el){
   else if(tab==='contact')renderContactTab(activeJob);
   else renderJobTab(tab);
 }
- 
+
 function renderJobTab(tab){
   const j=activeJob; if(!j)return;
   const body=document.getElementById('tab-body');
@@ -542,9 +542,9 @@ function renderJobTab(tab){
       </div>`;
   }
 }
- 
+
 function renderContactTab(j){
-  if(!jobContacts[j.id])jobContacts[j.id]={name:'',phone:'',email:'',address:'',agent:'',claim:''};
+  if(!jobContacts[j.id])jobContacts[j.id]={name:'',phone:'',email:'',address:'',agent:'',adjuster:'',claim:''};
   const c=jobContacts[j.id];
   const body=document.getElementById('tab-body');
   body.innerHTML=`
@@ -571,11 +571,12 @@ function renderContactTab(j){
     <div class="ssec">
       <div class="ssec-title">Insurance Info</div>
       <div class="field"><label>Agent Name</label><input id="ct-agent" placeholder="Insurance agent name" value="${c.agent}" oninput="saveContact()"></div>
+      <div class="field"><label>Adjuster Name</label><input id="ct-adjuster" placeholder="Insurance adjuster name" value="${c.adjuster||''}" oninput="saveContact()"></div>
       <div class="field"><label>Claim Number</label><input id="ct-claim" placeholder="e.g. CLM-123456" value="${c.claim}" oninput="saveContact()"></div>
     </div>
     <div style="font-size:11px;color:var(--text3);text-align:right">Syncs to shared sheet automatically</div>`;
 }
- 
+
 function renderPhotosTab(j){
   const body=document.getElementById('tab-body');
   body.innerHTML=`
@@ -593,18 +594,19 @@ function renderPhotosTab(j){
       </div>
     </div>`;
 }
- 
+
 // ── DATA MUTATIONS ──
 function saveNotes(){if(!activeJob)return;jobNotes[activeJob.id]=document.getElementById('notes-ta').value;scheduleSave();renderJobs();}
 function saveContact(){
   if(!activeJob)return;
-  if(!jobContacts[activeJob.id])jobContacts[activeJob.id]={name:'',phone:'',email:'',address:'',agent:'',claim:''};
+  if(!jobContacts[activeJob.id])jobContacts[activeJob.id]={name:'',phone:'',email:'',address:'',agent:'',adjuster:'',claim:''};
   const c=jobContacts[activeJob.id];
   c.name=document.getElementById('ct-name').value;
   c.phone=document.getElementById('ct-phone').value;
   c.email=document.getElementById('ct-email').value;
   c.address=document.getElementById('ct-address').value;
   c.agent=document.getElementById('ct-agent').value;
+  c.adjuster=document.getElementById('ct-adjuster').value;
   c.claim=document.getElementById('ct-claim').value;
   scheduleSave();
 }
@@ -613,7 +615,7 @@ function toggleCheck(id){if(!activeJob)return;const item=jobChecklists[activeJob
 function deleteCheck(id){if(!activeJob)return;jobChecklists[activeJob.id]=jobChecklists[activeJob.id].filter(c=>c.id!==id);scheduleSave();renderJobTab('checklist');renderJobs();}
 function addEstimate(){const name=document.getElementById('est-name').value.trim();const url=document.getElementById('est-url').value.trim();if(!name||!activeJob)return;if(!jobEstimates[activeJob.id])jobEstimates[activeJob.id]=[];jobEstimates[activeJob.id].push({id:'e'+Date.now(),name,url,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})});scheduleSave();renderJobTab('estimates');}
 function deleteEst(id){if(!activeJob)return;jobEstimates[activeJob.id]=jobEstimates[activeJob.id].filter(e=>e.id!==id);scheduleSave();renderJobTab('estimates');}
- 
+
 // ── EMPLOYEES ──
 function renderEmployees(){
   const list=document.getElementById('emp-list');
@@ -645,7 +647,7 @@ function deleteEmployee(id){
   renderEmployees();
   populateSelects();
 }
- 
+
 // ── TIME CARDS ──
 function renderTimeCards(){
   const c=document.getElementById('tc-content');
@@ -686,7 +688,7 @@ function submitClock(){
   scheduleSave();
   renderTimeCards();
 }
- 
+
 // ── VIEWS ──
 function showView(v,el){
   document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
@@ -698,7 +700,7 @@ function showView(v,el){
   if(v==='timecard')renderTimeCards();
   if(v==='employees')renderEmployees();
 }
- 
+
 // ── NEW JOB ──
 function openNewModal(){
   document.getElementById('nj-date').value=new Date().toISOString().split('T')[0];
@@ -721,12 +723,11 @@ function addJob(){
   renderJobs();
   populateSelects();
 }
- 
+
 function closeModal(id){document.getElementById(id).classList.remove('open');}
- 
+
 refreshData();
 setInterval(refreshData,5*60*1000);
 </script>
 </body>
 </html>
- 
