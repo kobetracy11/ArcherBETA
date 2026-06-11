@@ -1,3 +1,6 @@
+
+raw
+Archerbeta v2 · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -215,6 +218,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     </div>
     <div class="job-tabs" id="job-tabs">
       <div class="job-tab active" onclick="switchJobTab('overview',this)">Overview</div>
+      <div class="job-tab" onclick="switchJobTab('contact',this)">Contact</div>
       <div class="job-tab" onclick="switchJobTab('notes',this)">Notes</div>
       <div class="job-tab" onclick="switchJobTab('checklist',this)">Checklist</div>
       <div class="job-tab" onclick="switchJobTab('estimates',this)">Estimates</div>
@@ -319,7 +323,7 @@ const typeLabel={water:'Water Damage',fire:'Fire Damage',mold:'Mold Remediation'
 // State
 let sheetJobs=[], localJobs=[], currentFilter='open', activeJob=null, activeJobTab='overview';
 let nextId=10000, lastSync=null;
-let jobNotes={}, jobChecklists={}, jobEstimates={};
+let jobNotes={}, jobChecklists={}, jobEstimates={}, jobContacts={};
 let employees=[]; // {id, name, role, phone}
 let timeEntries=[]; // {id, emp, date, inTime, outTime, jobName, notes}
 let empNextId=1, tcNextId=1;
@@ -437,7 +441,7 @@ function openJobSheet(id){
 }
 function closeSheet(){document.getElementById('sheet-overlay').classList.remove('open');}
 function sheetOutside(e){if(e.target===document.getElementById('sheet-overlay'))closeSheet();}
-function switchJobTab(tab,el){activeJobTab=tab;document.querySelectorAll('.job-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');if(tab==='photos'){renderPhotosTab(activeJob);}else{renderJobTab(tab);}}
+function switchJobTab(tab,el){activeJobTab=tab;document.querySelectorAll('.job-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');if(tab==='photos'){renderPhotosTab(activeJob);}else if(tab==='contact'){renderContactTab(activeJob);}else{renderJobTab(tab);}}
  
 function renderJobTab(tab){
   const j=activeJob; if(!j)return;
@@ -519,6 +523,49 @@ function saveNotes(){if(!activeJob)return;jobNotes[activeJob.id]=document.getEle
 function addCheck(){const inp=document.getElementById('check-new');const text=inp.value.trim();if(!text||!activeJob)return;if(!jobChecklists[activeJob.id])jobChecklists[activeJob.id]=[];jobChecklists[activeJob.id].push({id:Date.now(),text,done:false});inp.value='';renderJobTab('checklist');renderJobs();}
 function toggleCheck(id){if(!activeJob)return;const item=jobChecklists[activeJob.id].find(c=>c.id===id);if(item)item.done=!item.done;renderJobTab('checklist');renderJobs();}
 function deleteCheck(id){if(!activeJob)return;jobChecklists[activeJob.id]=jobChecklists[activeJob.id].filter(c=>c.id!==id);renderJobTab('checklist');renderJobs();}
+function renderContactTab(j){
+  if(!jobContacts[j.id]) jobContacts[j.id]={name:'',phone:'',email:'',address:'',agent:'',claim:''};
+  const c=jobContacts[j.id];
+  const body=document.getElementById('tab-body');
+  body.innerHTML=`
+    <div class="ssec">
+      <div class="ssec-title">Customer Contact</div>
+      <div class="field"><label>Full Name</label><input id="ct-name" placeholder="Customer full name" value="${c.name}" oninput="saveContact()"></div>
+      <div class="field"><label>Phone Number</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="ct-phone" placeholder="e.g. 208-555-1234" value="${c.phone}" type="tel" oninput="saveContact()" style="flex:1;padding:12px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:16px;font-family:inherit">
+          ${c.phone?`<a href="tel:${c.phone}" class="btn btn-green" style="padding:12px 14px;flex-shrink:0"><i class="ti ti-phone"></i>Call</a>`:''}
+        </div>
+      </div>
+      <div class="field"><label>Email Address</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <input id="ct-email" placeholder="e.g. name@email.com" value="${c.email}" type="email" oninput="saveContact()" style="flex:1;padding:12px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:16px;font-family:inherit">
+          ${c.email?`<a href="mailto:${c.email}" class="btn btn-green" style="padding:12px 14px;flex-shrink:0"><i class="ti ti-mail"></i>Email</a>`:''}
+        </div>
+      </div>
+      <div class="field"><label>Property Address</label><textarea id="ct-address" placeholder="Full property address" oninput="saveContact()" style="width:100%;padding:12px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:16px;font-family:inherit;resize:none;height:80px">${c.address}</textarea>
+        ${c.address?`<a href="https://maps.google.com?q=${encodeURIComponent(c.address)}" target="_blank" class="btn btn-green" style="width:100%;justify-content:center;margin-top:8px;padding:12px"><i class="ti ti-map-pin"></i>Open in Maps</a>`:''}
+      </div>
+    </div>
+    <div class="ssec">
+      <div class="ssec-title">Insurance Info</div>
+      <div class="field"><label>Agent Name</label><input id="ct-agent" placeholder="Insurance agent full name" value="${c.agent}" oninput="saveContact()"></div>
+      <div class="field"><label>Claim Number</label><input id="ct-claim" placeholder="e.g. CLM-123456" value="${c.claim}" oninput="saveContact()"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);text-align:right;margin-top:-10px">Saves automatically</div>`;
+}
+ 
+function saveContact(){
+  if(!activeJob) return;
+  if(!jobContacts[activeJob.id]) jobContacts[activeJob.id]={name:'',phone:'',email:'',address:'',agent:'',claim:''};
+  jobContacts[activeJob.id].name    = document.getElementById('ct-name').value;
+  jobContacts[activeJob.id].phone   = document.getElementById('ct-phone').value;
+  jobContacts[activeJob.id].email   = document.getElementById('ct-email').value;
+  jobContacts[activeJob.id].address = document.getElementById('ct-address').value;
+  jobContacts[activeJob.id].agent   = document.getElementById('ct-agent').value;
+  jobContacts[activeJob.id].claim   = document.getElementById('ct-claim').value;
+}
+ 
 function renderPhotosTab(j){
   const body=document.getElementById('tab-body');
   const jobFolder=encodeURIComponent(j.name);
@@ -692,3 +739,4 @@ setInterval(refreshData,5*60*1000);
 </script>
 </body>
 </html>
+ 
