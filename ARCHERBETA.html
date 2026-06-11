@@ -218,6 +218,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       <div class="job-tab" onclick="switchJobTab('notes',this)">Notes</div>
       <div class="job-tab" onclick="switchJobTab('checklist',this)">Checklist</div>
       <div class="job-tab" onclick="switchJobTab('estimates',this)">Estimates</div>
+      <div class="job-tab" onclick="switchJobTab('photos',this)">Photos</div>
     </div>
     <div class="tab-body" id="tab-body"></div>
   </div>
@@ -308,6 +309,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <script>
 const SCRIPT_URL='https://script.google.com/macros/s/AKfycbzmdpUH5d0XojZNH6lb7kRSRLJXiVJyPh9GP1GfmuNeY3_ZihX9zkZJ-yHTYKgyZIhR/exec';
 const DRIVE='https://drive.google.com/drive/u/0/folders/1ZAtp4mCnBoc8yV6KUVkbitL0RAWI0Dyl';
+const PHOTOS='https://drive.google.com/drive/u/0/folders/1kFpeUpQHp_sjDSkk2ueWw7nCTnNKdCpS';
 const TODAY=new Date(); TODAY.setHours(0,0,0,0);
  
 const typeIcon={water:'ti-droplet',fire:'ti-flame',mold:'ti-leaf',storm:'ti-cloud-storm',other:'ti-tool'};
@@ -435,7 +437,7 @@ function openJobSheet(id){
 }
 function closeSheet(){document.getElementById('sheet-overlay').classList.remove('open');}
 function sheetOutside(e){if(e.target===document.getElementById('sheet-overlay'))closeSheet();}
-function switchJobTab(tab,el){activeJobTab=tab;document.querySelectorAll('.job-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderJobTab(tab);}
+function switchJobTab(tab,el){activeJobTab=tab;document.querySelectorAll('.job-tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');if(tab==='photos'){renderPhotosTab(activeJob);}else{renderJobTab(tab);}}
  
 function renderJobTab(tab){
   const j=activeJob; if(!j)return;
@@ -517,6 +519,39 @@ function saveNotes(){if(!activeJob)return;jobNotes[activeJob.id]=document.getEle
 function addCheck(){const inp=document.getElementById('check-new');const text=inp.value.trim();if(!text||!activeJob)return;if(!jobChecklists[activeJob.id])jobChecklists[activeJob.id]=[];jobChecklists[activeJob.id].push({id:Date.now(),text,done:false});inp.value='';renderJobTab('checklist');renderJobs();}
 function toggleCheck(id){if(!activeJob)return;const item=jobChecklists[activeJob.id].find(c=>c.id===id);if(item)item.done=!item.done;renderJobTab('checklist');renderJobs();}
 function deleteCheck(id){if(!activeJob)return;jobChecklists[activeJob.id]=jobChecklists[activeJob.id].filter(c=>c.id!==id);renderJobTab('checklist');renderJobs();}
+function renderPhotosTab(j){
+  const body=document.getElementById('tab-body');
+  const jobFolder=encodeURIComponent(j.name);
+  body.innerHTML=`
+    <div class="ssec">
+      <div class="ssec-title">Job Photos</div>
+      <div style="background:var(--blue-bg);border-radius:var(--radius);padding:12px 14px;margin-bottom:16px;font-size:13px;color:var(--blue)">
+        <i class="ti ti-info-circle" style="font-size:15px;vertical-align:-2px"></i>
+        Create a folder named <strong>${j.name}</strong> inside your ARCHER Job Photos folder, then upload photos there from your phone.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <a href="${PHOTOS}" target="_blank" class="btn" style="justify-content:center;padding:13px;font-size:14px;background:var(--green-bg);color:var(--green);border-color:var(--green-border)">
+          <i class="ti ti-brand-google-drive"></i> Open ARCHER Job Photos Folder
+        </a>
+        <div style="font-size:12px;color:var(--text3);text-align:center">
+          Tap above → find the <strong>${j.name}</strong> folder → upload photos directly from your phone
+        </div>
+      </div>
+    </div>
+    <div class="ssec">
+      <div class="ssec-title">How to upload from your iPhone</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div style="background:var(--bg2);border-radius:var(--radius);padding:12px;font-size:13px;color:var(--text2);line-height:1.7">
+          1. Tap <strong>Open ARCHER Job Photos Folder</strong> above<br>
+          2. Open or create a folder named <strong>${j.name}</strong><br>
+          3. Tap the <strong>+</strong> button in Google Drive<br>
+          4. Tap <strong>Upload</strong><br>
+          5. Select photos from your camera roll
+        </div>
+      </div>
+    </div>`;
+}
+ 
 function addEstimate(){const name=document.getElementById('est-name').value.trim();const url=document.getElementById('est-url').value.trim();if(!name||!activeJob)return;if(!jobEstimates[activeJob.id])jobEstimates[activeJob.id]=[];jobEstimates[activeJob.id].push({id:'e'+Date.now(),name,url,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})});renderJobTab('estimates');}
 function deleteEst(id){if(!activeJob)return;jobEstimates[activeJob.id]=jobEstimates[activeJob.id].filter(e=>e.id!==id);renderJobTab('estimates');}
  
