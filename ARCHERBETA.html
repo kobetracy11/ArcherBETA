@@ -34,13 +34,11 @@
   }
 }
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding-bottom:90px}
-
-/* Header */
 .header{background:var(--bg);border-bottom:0.5px solid var(--border);padding:14px 16px 10px;position:sticky;top:0;z-index:40}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
 .logo{font-size:17px;font-weight:700;letter-spacing:2px;color:var(--text)}
 .logo span{font-size:10px;color:var(--text3);display:block;letter-spacing:1px;font-weight:400;margin-top:-2px}
-.sync-badge{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:3px}
+.sync-badge{font-size:10px;padding:3px 9px;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:3px}
 .sync-live{background:var(--green-bg);color:var(--green)}
 .sync-err{background:var(--red-bg);color:var(--red)}
 .sync-loading{background:var(--bg2);color:var(--text3)}
@@ -48,24 +46,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .filters::-webkit-scrollbar{display:none}
 .filter-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--border);background:var(--bg);color:var(--text2);white-space:nowrap;flex-shrink:0}
 .filter-btn.active{background:var(--bg2);color:var(--text);border-color:var(--border2)}
-
-/* Buttons */
 .btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--border2);background:var(--bg);color:var(--text);text-decoration:none}
 .btn:active{opacity:0.7}
 .btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
 .btn-drive{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
-
-/* Metrics */
 .metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 14px 4px}
 .metric{background:var(--bg);border-radius:var(--radius-lg);padding:12px 10px;text-align:center;border:0.5px solid var(--border)}
 .metric-val{font-size:28px;font-weight:700;line-height:1}
 .metric-label{font-size:10px;color:var(--text2);margin-top:3px;font-weight:500}
 .val-blue{color:var(--blue)}.val-green{color:var(--green)}
-
-/* Last synced bar */
 .sync-bar{text-align:center;font-size:11px;color:var(--text3);padding:6px 14px 10px;display:flex;align-items:center;justify-content:center;gap:6px}
-
-/* Jobs */
 .jobs-list{padding:0 14px;display:flex;flex-direction:column;gap:8px}
 .job-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:13px 14px;cursor:pointer}
 .job-card:active{opacity:0.75}
@@ -85,21 +75,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .pill-closed{background:var(--green-bg);color:var(--green)}
 .day-badge{font-size:11px;font-weight:500;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);padding:2px 8px;border-radius:6px;white-space:nowrap}
 .day-badge.hot{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
-
-/* Loading / error state */
-.state-box{text-align:center;padding:60px 20px}
-.state-box i{font-size:40px;color:var(--text3);display:block;margin-bottom:12px}
-.state-box p{font-size:14px;color:var(--text2);line-height:1.6}
-.spinner{width:36px;height:36px;border:3px solid var(--border2);border-top-color:var(--blue);border-radius:50%;animation:spin 0.75s linear infinite;margin:0 auto 14px}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* Bottom nav */
 .bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:0.5px solid var(--border);display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom,10px)}
 .bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;cursor:pointer;color:var(--text3);font-size:10px;gap:3px;text-decoration:none;font-weight:500}
 .bnav-item.active{color:var(--blue)}
 .bnav-item i{font-size:22px}
-
-/* Detail sheet */
 .sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:50;align-items:flex-end}
 .sheet-overlay.open{display:flex}
 .sheet{background:var(--bg);border-radius:22px 22px 0 0;width:100%;max-height:88vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px)}
@@ -118,8 +97,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .srow-label{font-size:13px;color:var(--text2)}
 .srow-val{font-size:13px;font-weight:600;color:var(--text);text-align:right;max-width:65%}
 .drive-strip{display:flex;align-items:center;gap:10px;background:var(--green-bg);border:0.5px solid var(--green-border);border-radius:var(--radius);padding:12px 14px;margin-top:8px}
-
-/* New job modal */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:60;align-items:flex-end}
 .modal-overlay.open{display:flex}
 .modal{background:var(--bg);border-radius:22px 22px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px)}
@@ -134,6 +111,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
 .modal-footer{padding:12px 18px;border-top:0.5px solid var(--border);display:flex;gap:10px}
 .modal-footer .btn{flex:1;justify-content:center;padding:12px}
+.debug-box{background:var(--bg2);border-radius:var(--radius);padding:12px;font-size:11px;color:var(--text2);word-break:break-all;margin:10px 14px;display:none}
 </style>
 </head>
 <body>
@@ -142,7 +120,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <div class="header-top">
     <div class="logo">ARCHERBETA <span>RESTORATION</span></div>
     <div style="display:flex;align-items:center;gap:8px">
-      <span class="sync-badge sync-loading" id="sync-badge"><i class="ti ti-refresh" style="font-size:11px"></i>Syncing…</span>
+      <span class="sync-badge sync-loading" id="sync-badge"><i class="ti ti-refresh" style="font-size:11px"></i>Syncing</span>
       <a class="btn btn-drive" href="https://drive.google.com/drive/u/0/folders/1ZAtp4mCnBoc8yV6KUVkbitL0RAWI0Dyl" target="_blank" style="padding:6px 10px;font-size:12px">
         <i class="ti ti-brand-google-drive"></i>Receipts
       </a>
@@ -155,8 +133,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<div class="metrics" id="metrics"></div>
-<div class="sync-bar" id="sync-bar"><i class="ti ti-loader" style="font-size:13px"></i> Loading from Google Sheet…</div>
+<div class="metrics" id="metrics">
+  <div class="metric"><div class="metric-val val-blue">—</div><div class="metric-label">Open</div></div>
+  <div class="metric"><div class="metric-val val-green">—</div><div class="metric-label">Closed</div></div>
+  <div class="metric"><div class="metric-val">—</div><div class="metric-label">Total</div></div>
+</div>
+<div class="sync-bar" id="sync-bar"><i class="ti ti-loader" style="font-size:13px"></i> Connecting to Google Sheet…</div>
+<div class="debug-box" id="debug-box"></div>
 <div id="list-wrap"></div>
 
 <div class="bottomnav">
@@ -166,7 +149,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   <a class="bnav-item" href="https://drive.google.com/drive/u/0/folders/1ZAtp4mCnBoc8yV6KUVkbitL0RAWI0Dyl" target="_blank"><i class="ti ti-brand-google-drive"></i>Drive</a>
 </div>
 
-<!-- Detail Sheet -->
 <div class="sheet-overlay" id="sheet-overlay" onclick="sheetOutside(event)">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -178,7 +160,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
-<!-- New Job Modal -->
 <div class="modal-overlay" id="new-modal" onclick="modalOutside(event)">
   <div class="modal">
     <div class="modal-handle"></div>
@@ -209,10 +190,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
         <div class="field" style="margin-bottom:0"><label>Insurance #</label><input id="nj-ins" placeholder="Optional" autocomplete="off"></div>
       </div>
       <div class="field" style="margin-top:14px"><label>Notes</label><textarea id="nj-notes" placeholder="Initial damage notes…"></textarea></div>
-      <div style="background:var(--blue-bg);border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--blue);margin-top:4px">
-        <i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i>
-        New jobs added here appear on everyone's app. Add the start date to your Google Sheet too to keep everything in sync.
-      </div>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal()">Cancel</button>
@@ -226,191 +203,193 @@ const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmdpUH5d0XojZNH6lb7
 const DRIVE = 'https://drive.google.com/drive/u/0/folders/1ZAtp4mCnBoc8yV6KUVkbitL0RAWI0Dyl';
 const TODAY = new Date(); TODAY.setHours(0,0,0,0);
 
-const typeIcon = {water:'ti-droplet',fire:'ti-flame',mold:'ti-leaf',storm:'ti-cloud-storm',other:'ti-tool'};
-const typeCls  = {water:'i-water',fire:'i-fire',mold:'i-mold',storm:'i-storm',other:'i-other'};
-const typeLabel= {water:'Water Damage',fire:'Fire Damage',mold:'Mold Remediation',storm:'Storm Damage',other:'Other'};
+const typeIcon  = {water:'ti-droplet',fire:'ti-flame',mold:'ti-leaf',storm:'ti-cloud-storm',other:'ti-tool'};
+const typeCls   = {water:'i-water',fire:'i-fire',mold:'i-mold',storm:'i-storm',other:'i-other'};
+const typeLabel = {water:'Water Damage',fire:'Fire Damage',mold:'Mold Remediation',storm:'Storm Damage',other:'Other'};
 
-let jobs = [];
-let localJobs = []; // new jobs added via app
+let sheetJobs = [];
+let localJobs = [];
 let currentFilter = 'open';
 let activeJob = null;
 let lastSync = null;
 let nextId = 10000;
 
-function guessType(name) {
+function guessType(name){
   const n = name.toLowerCase();
-  if (n.includes('roof') || n.includes('storm') || n.includes('hail') || n.includes('flood')) return 'storm';
-  if (n.includes('fire') || n.includes('smoke') || n.includes('soot') || n.includes('lunchroom')) return 'fire';
-  if (n.includes('mold') || n.includes('mould')) return 'mold';
+  if(n.includes('roof')||n.includes('hail')||n.includes('storm')||n.includes('wind')) return 'storm';
+  if(n.includes('fire')||n.includes('smoke')||n.includes('soot')||n.includes('lunchroom')) return 'fire';
+  if(n.includes('mold')||n.includes('mould')) return 'mold';
   return 'water';
 }
+function daysBetween(a,b){
+  return Math.max(0,Math.round(Math.abs(new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5));
+}
+function daysOpen(s){
+  if(!s) return null;
+  return Math.max(0,Math.round((TODAY-new Date(s+'T00:00:00'))/864e5));
+}
+function fmtDate(s){
+  if(!s) return '—';
+  try{ return new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+  catch(e){ return s; }
+}
+function timeAgo(d){
+  if(!d) return '';
+  const mins=Math.round((new Date()-d)/60000);
+  if(mins<1) return 'just now';
+  if(mins<60) return mins+'m ago';
+  return Math.round(mins/60)+'h ago';
+}
+function setSyncBadge(state){
+  const b=document.getElementById('sync-badge');
+  b.className='sync-badge';
+  if(state==='live')    {b.classList.add('sync-live');    b.innerHTML='<i class="ti ti-circle-check" style="font-size:11px"></i> Live';}
+  if(state==='error')   {b.classList.add('sync-err');     b.innerHTML='<i class="ti ti-alert-circle" style="font-size:11px"></i> Offline';}
+  if(state==='loading') {b.classList.add('sync-loading'); b.innerHTML='<i class="ti ti-refresh" style="font-size:11px"></i> Syncing';}
+}
 
-function daysBetween(a, b) {
-  return Math.max(0, Math.round(Math.abs(new Date(b+'T00:00:00') - new Date(a+'T00:00:00')) / 864e5));
-}
-function daysOpen(s) {
-  if (!s) return null;
-  return Math.max(0, Math.round((TODAY - new Date(s+'T00:00:00')) / 864e5));
-}
-function fmtDate(s) {
-  if (!s) return '—';
-  try { return new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
-  catch(e) { return s; }
-}
-function timeAgo(d) {
-  if (!d) return '';
-  const mins = Math.round((new Date() - d) / 60000);
-  if (mins < 1) return 'just now';
-  if (mins < 60) return `${mins}m ago`;
-  return `${Math.round(mins/60)}h ago`;
-}
-
-async function refreshData() {
+async function refreshData(){
   setSyncBadge('loading');
-  document.getElementById('sync-bar').innerHTML = '<i class="ti ti-loader" style="font-size:13px"></i> Syncing with Google Sheet…';
+  document.getElementById('sync-bar').innerHTML='<i class="ti ti-loader" style="font-size:13px"></i> Syncing with Google Sheet…';
+  try{
+    // Use no-cors mode won't work for reading data, so we use cors with callback
+    const url = SCRIPT_URL + '?callback=cb&t=' + Date.now();
+    const res = await fetch(SCRIPT_URL, {method:'GET', mode:'cors'});
+    const text = await res.text();
 
-  try {
-    const res = await fetch(SCRIPT_URL);
-    if (!res.ok) throw new Error('Network error');
-    const raw = await res.json();
+    // Try parsing as JSON
+    let raw;
+    try{
+      raw = JSON.parse(text);
+    } catch(e){
+      // Sometimes Apps Script wraps in callback — strip it
+      const match = text.match(/\[.*\]/s);
+      if(match) raw = JSON.parse(match[0]);
+      else throw new Error('Bad response: ' + text.substring(0,100));
+    }
 
-    jobs = raw
-      .filter(r => r.name && r.name.trim() !== '')
-      .map((r, i) => ({
-        id: i + 1,
+    if(!Array.isArray(raw)) throw new Error('Not an array');
+
+    sheetJobs = raw
+      .filter(r => r && r.name && r.name.trim() !== '')
+      .map((r,i) => ({
+        id: i+1,
         name: r.name.trim(),
-        q: r.quarter || '',
+        q: r.quarter||'',
         type: guessType(r.name),
-        crew: '',
-        start: r.start || '',
-        closed: r.closed === true || (r.closeDate && r.closeDate !== ''),
-        closeDate: r.closeDate || '',
-        ins: '',
-        notes: '',
-        fromSheet: true,
+        crew:'',
+        start: r.start||'',
+        closed: r.closed===true||(!!r.closeDate&&r.closeDate!==''),
+        closeDate: r.closeDate||'',
+        ins:'', notes:'',
+        fromSheet:true,
       }));
 
     lastSync = new Date();
     setSyncBadge('live');
     document.getElementById('sync-bar').innerHTML =
-      `<i class="ti ti-circle-check" style="font-size:13px;color:var(--green)"></i> Live from Google Sheet · ${timeAgo(lastSync)}`;
+      '<i class="ti ti-circle-check" style="font-size:13px;color:var(--green)"></i> Live from Google Sheet · '+timeAgo(lastSync);
+    document.getElementById('debug-box').style.display='none';
 
-  } catch(e) {
+  } catch(e){
     setSyncBadge('error');
     document.getElementById('sync-bar').innerHTML =
-      '<i class="ti ti-alert-circle" style="font-size:13px;color:var(--red)"></i> Could not reach sheet — showing last data';
+      '<i class="ti ti-alert-circle" style="font-size:13px;color:var(--red)"></i> Could not reach sheet — tap Refresh to try again';
+    const dbg = document.getElementById('debug-box');
+    dbg.style.display='block';
+    dbg.textContent = 'Error: '+e.message;
   }
-
   render();
 }
 
-function setSyncBadge(state) {
-  const b = document.getElementById('sync-badge');
-  b.className = 'sync-badge';
-  if (state === 'live')    { b.classList.add('sync-live');    b.innerHTML = '<i class="ti ti-circle-check" style="font-size:11px"></i> Live'; }
-  if (state === 'error')   { b.classList.add('sync-err');     b.innerHTML = '<i class="ti ti-alert-circle" style="font-size:11px"></i> Offline'; }
-  if (state === 'loading') { b.classList.add('sync-loading'); b.innerHTML = '<i class="ti ti-refresh" style="font-size:11px"></i> Syncing…'; }
-}
-
-function getAllJobs() {
-  return [...jobs, ...localJobs];
-}
-
-function getFiltered() {
-  const all = getAllJobs();
-  if (currentFilter === 'open')   return all.filter(j => !j.closed);
-  if (currentFilter === 'closed') return all.filter(j => j.closed);
+function getAllJobs(){ return [...sheetJobs,...localJobs]; }
+function getFiltered(){
+  const all=getAllJobs();
+  if(currentFilter==='open')   return all.filter(j=>!j.closed);
+  if(currentFilter==='closed') return all.filter(j=>j.closed);
   return all;
 }
 
-function render() {
-  const all = getAllJobs();
-  const open = all.filter(j => !j.closed).length;
-  const closed = all.filter(j => j.closed).length;
-
-  document.getElementById('metrics').innerHTML = `
+function render(){
+  const all=getAllJobs();
+  const open=all.filter(j=>!j.closed).length;
+  const closed=all.filter(j=>j.closed).length;
+  document.getElementById('metrics').innerHTML=`
     <div class="metric"><div class="metric-val val-blue">${open}</div><div class="metric-label">Open</div></div>
     <div class="metric"><div class="metric-val val-green">${closed}</div><div class="metric-label">Closed</div></div>
     <div class="metric"><div class="metric-val">${all.length}</div><div class="metric-label">Total</div></div>
   `;
-
-  const items = getFiltered();
-  const wrap = document.getElementById('list-wrap');
-
-  if (!items.length) {
-    wrap.innerHTML = '<div style="text-align:center;color:var(--text3);padding:50px 20px;font-size:14px">No jobs here.</div>';
+  const items=getFiltered();
+  const wrap=document.getElementById('list-wrap');
+  if(!items.length){
+    wrap.innerHTML='<div style="text-align:center;color:var(--text3);padding:50px 20px;font-size:14px">'+(sheetJobs.length===0?'Tap Refresh to load jobs from your sheet.':'No jobs in this view.')+'</div>';
     return;
   }
-
-  wrap.innerHTML = '<div class="jobs-list">' + items.map(j => {
-    const days = j.closed && j.closeDate && j.start
-      ? daysBetween(j.start, j.closeDate)
-      : j.start ? daysOpen(j.start) : null;
-    const hot = !j.closed && days !== null && days > 14;
-    const badge = j.closed && j.closeDate && j.start ? `${days}d job`
-      : j.closed ? 'Closed'
-      : days !== null ? `Day ${days}` : '—';
+  wrap.innerHTML='<div class="jobs-list">'+items.map(j=>{
+    const days = j.closed&&j.closeDate&&j.start ? daysBetween(j.start,j.closeDate)
+               : j.start ? daysOpen(j.start) : null;
+    const hot = !j.closed&&days!==null&&days>14;
+    const badge = j.closed&&j.closeDate&&j.start ? days+'d job'
+                : j.closed ? 'Closed'
+                : days!==null ? 'Day '+days : '—';
     return `<div class="job-card" onclick="openSheet(${j.id})">
       <div class="jrow">
         <div class="jicon ${typeCls[j.type]}"><i class="ti ${typeIcon[j.type]}"></i></div>
         <div class="jinfo">
           <div class="jname">${j.name}</div>
           <div class="jmeta">
-            ${j.start ? `<span><i class="ti ti-calendar" style="font-size:11px;vertical-align:-1px"></i> ${fmtDate(j.start)}</span>` : '<span style="color:var(--text3)">No start date</span>'}
-            ${j.q ? `<span style="background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:10px">${j.q}</span>` : ''}
-            ${!j.fromSheet ? '<span style="background:var(--blue-bg);color:var(--blue);padding:1px 6px;border-radius:4px;font-size:10px">New</span>' : ''}
+            ${j.start?`<span><i class="ti ti-calendar" style="font-size:11px;vertical-align:-1px"></i> ${fmtDate(j.start)}</span>`:'<span style="color:var(--text3)">No start date</span>'}
+            ${j.q?`<span style="background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:10px">${j.q}</span>`:''}
+            ${!j.fromSheet?'<span style="background:var(--blue-bg);color:var(--blue);padding:1px 6px;border-radius:4px;font-size:10px">New</span>':''}
           </div>
         </div>
         <div class="jright">
-          <span class="pill ${j.closed ? 'pill-closed' : 'pill-open'}">${j.closed ? 'Closed' : 'Open'}</span>
-          <span class="day-badge ${hot ? 'hot' : ''}">${badge}</span>
+          <span class="pill ${j.closed?'pill-closed':'pill-open'}">${j.closed?'Closed':'Open'}</span>
+          <span class="day-badge ${hot?'hot':''}">${badge}</span>
         </div>
       </div>
     </div>`;
-  }).join('') + '</div>';
+  }).join('')+'</div>';
 }
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+function setFilter(f,btn){
+  currentFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   render();
 }
 
-function openSheet(id) {
-  activeJob = getAllJobs().find(j => j.id === id);
-  if (!activeJob) return;
-  const j = activeJob;
-  const days = j.closed && j.closeDate && j.start
-    ? daysBetween(j.start, j.closeDate)
-    : j.start ? daysOpen(j.start) : null;
-
-  document.getElementById('sheet-title').textContent = j.name;
-  document.getElementById('sheet-sub').textContent = typeLabel[j.type] + (j.q ? ' · ' + j.q : '');
-
-  document.getElementById('sheet-body').innerHTML = `
+function openSheet(id){
+  activeJob=getAllJobs().find(j=>j.id===id);
+  if(!activeJob) return;
+  const j=activeJob;
+  const days = j.closed&&j.closeDate&&j.start ? daysBetween(j.start,j.closeDate)
+             : j.start ? daysOpen(j.start) : null;
+  document.getElementById('sheet-title').textContent=j.name;
+  document.getElementById('sheet-sub').textContent=typeLabel[j.type]+(j.q?' · '+j.q:'');
+  document.getElementById('sheet-body').innerHTML=`
     <div class="ssec">
       <div style="display:flex;align-items:flex-end;gap:16px;margin-bottom:8px">
         <div>
-          <div class="big-num">${days !== null ? days : '—'}</div>
-          <div class="big-label">${j.closed && j.closeDate ? 'days (job duration)' : 'days since start'}</div>
+          <div class="big-num">${days!==null?days:'—'}</div>
+          <div class="big-label">${j.closed&&j.closeDate?'days (job duration)':'days since start'}</div>
         </div>
-        <span class="pill ${j.closed ? 'pill-closed' : 'pill-open'}" style="font-size:13px;padding:5px 14px;margin-bottom:8px">${j.closed ? 'Closed' : 'Open'}</span>
+        <span class="pill ${j.closed?'pill-closed':'pill-open'}" style="font-size:13px;padding:5px 14px;margin-bottom:8px">${j.closed?'Closed':'Open'}</span>
       </div>
     </div>
     <div class="ssec">
       <div class="ssec-title">Job Details</div>
-      <div class="srow"><span class="srow-label">Quarter</span><span class="srow-val">${j.q || '—'}</span></div>
+      <div class="srow"><span class="srow-label">Quarter</span><span class="srow-val">${j.q||'—'}</span></div>
       <div class="srow"><span class="srow-label">Start date</span><span class="srow-val">${fmtDate(j.start)}</span></div>
-      ${j.closed && j.closeDate ? `<div class="srow"><span class="srow-label">Date completed</span><span class="srow-val">${fmtDate(j.closeDate)}</span></div>` : ''}
-      ${j.closed && j.closeDate && j.start ? `<div class="srow"><span class="srow-label">Duration</span><span class="srow-val">${days} day${days !== 1 ? 's' : ''}</span></div>` : ''}
-      ${j.ins ? `<div class="srow"><span class="srow-label">Insurance #</span><span class="srow-val">${j.ins}</span></div>` : ''}
+      ${j.closed&&j.closeDate?`<div class="srow"><span class="srow-label">Date completed</span><span class="srow-val">${fmtDate(j.closeDate)}</span></div>`:''}
+      ${j.closed&&j.closeDate&&j.start?`<div class="srow"><span class="srow-label">Duration</span><span class="srow-val">${days} day${days!==1?'s':''}</span></div>`:''}
+      ${j.ins?`<div class="srow"><span class="srow-label">Insurance #</span><span class="srow-val">${j.ins}</span></div>`:''}
     </div>
-    ${j.fromSheet ? `
-      <div style="background:var(--blue-bg);border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--blue);margin-bottom:18px">
-        <i class="ti ti-table" style="font-size:14px;vertical-align:-2px"></i>
-        To update this job's dates, edit Column M (start) or Column O (completed) in your Google Sheet. The app will sync automatically on next refresh.
-      </div>` : ''}
+    ${j.fromSheet?`
+    <div style="background:var(--blue-bg);border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--blue);margin-bottom:18px">
+      <i class="ti ti-table" style="font-size:14px;vertical-align:-2px"></i>
+      Update dates in Column M (start) or Column O (completed) in your Google Sheet. Tap Refresh to sync.
+    </div>`:''}
     <div class="drive-strip">
       <i class="ti ti-brand-google-drive" style="font-size:22px;color:var(--green);flex-shrink:0"></i>
       <div style="flex:1;font-size:13px;font-weight:600;color:var(--green)">Job Receipts Folder</div>
@@ -420,44 +399,43 @@ function openSheet(id) {
   document.getElementById('sheet-overlay').classList.add('open');
 }
 
-function closeSheet() { document.getElementById('sheet-overlay').classList.remove('open'); }
-function sheetOutside(e) { if (e.target === document.getElementById('sheet-overlay')) closeSheet(); }
+function closeSheet(){document.getElementById('sheet-overlay').classList.remove('open');}
+function sheetOutside(e){if(e.target===document.getElementById('sheet-overlay'))closeSheet();}
 
-function openNewModal() {
-  document.getElementById('nj-date').value = new Date().toISOString().split('T')[0];
-  ['nj-name','nj-notes','nj-ins'].forEach(id => document.getElementById(id).value = '');
+function openNewModal(){
+  document.getElementById('nj-date').value=new Date().toISOString().split('T')[0];
+  ['nj-name','nj-notes','nj-ins'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('new-modal').classList.add('open');
 }
-function closeModal() { document.getElementById('new-modal').classList.remove('open'); }
-function modalOutside(e) { if (e.target === document.getElementById('new-modal')) closeModal(); }
+function closeModal(){document.getElementById('new-modal').classList.remove('open');}
+function modalOutside(e){if(e.target===document.getElementById('new-modal'))closeModal();}
 
-function addJob() {
-  const name = document.getElementById('nj-name').value.trim();
-  const date = document.getElementById('nj-date').value;
-  if (!name || !date) { alert('Name and start date are required.'); return; }
+function addJob(){
+  const name=document.getElementById('nj-name').value.trim();
+  const date=document.getElementById('nj-date').value;
+  if(!name||!date){alert('Name and start date are required.');return;}
   localJobs.unshift({
-    id: nextId++, name,
-    type: document.getElementById('nj-type').value,
-    crew: document.getElementById('nj-crew').value,
-    q: '', start: date, closed: false, closeDate: '',
-    ins: document.getElementById('nj-ins').value.trim(),
-    notes: document.getElementById('nj-notes').value.trim(),
-    fromSheet: false,
+    id:nextId++,name,
+    type:document.getElementById('nj-type').value,
+    crew:document.getElementById('nj-crew').value,
+    q:'',start:date,closed:false,closeDate:'',
+    ins:document.getElementById('nj-ins').value.trim(),
+    notes:document.getElementById('nj-notes').value.trim(),
+    fromSheet:false,
   });
   closeModal();
-  currentFilter = 'open';
-  document.querySelectorAll('.filter-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+  currentFilter='open';
+  document.querySelectorAll('.filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   render();
 }
 
-function setNav(el) {
-  document.querySelectorAll('.bnav-item').forEach(b => b.classList.remove('active'));
+function setNav(el){
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
   el.classList.add('active');
 }
 
-// Auto-refresh every 5 minutes
 refreshData();
-setInterval(refreshData, 5 * 60 * 1000);
+setInterval(refreshData, 5*60*1000);
 </script>
 </body>
 </html>
