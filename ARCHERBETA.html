@@ -288,7 +288,7 @@ const typeLabel = {water:'Water Damage',fire:'Fire Damage',mold:'Mold Remediatio
 
 // ── STATE ──
 let sheetJobs=[], localJobs=[], currentFilter='open', activeJob=null;
-let jobNotes={}, jobChecklists={}, jobEstimates={}, jobContacts={};
+let jobNotes={}, jobChecklists={}, jobEstimates={}, jobContacts={}, jobTypes={};
 let employees=[], timeEntries=[];
 let nextId=10000, empNextId=1, tcNextId=1;
 let lastSync=null, saveTimer=null;
@@ -324,7 +324,7 @@ async function refreshData(){
     // Load jobs from Front Page
     const jobs = await apiGet('getJobs');
     if(Array.isArray(jobs)){
-      sheetJobs=jobs.filter(r=>r&&r.name).map((r,i)=>({id:i+1,name:r.name.trim(),q:r.quarter||'',type:guessType(r.name),crew:'',start:r.start||'',closed:r.closed,closeDate:r.closeDate||'',fromSheet:true}));
+      sheetJobs=jobs.filter(r=>r&&r.name).map((r,i)=>({id:i+1,name:r.name.trim(),q:r.quarter||'',type:jobTypes[i+1]||guessType(r.name),crew:'',start:r.start||'',closed:r.closed,closeDate:r.closeDate||'',fromSheet:true}));
     }
     // Load app data
     const data = await apiGet('getData');
@@ -480,6 +480,26 @@ function renderJobTab(tab){
         </div>
       </div>
       <div class="ssec">
+        <div class="ssec-title">Job Type</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div onclick="setJobType('water')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='water'?'var(--blue)':'var(--border)'};background:${j.type==='water'?'var(--blue-bg)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-droplet" style="font-size:18px;color:var(--blue)"></i><span style="font-size:13px;font-weight:500">Water Damage</span>
+          </div>
+          <div onclick="setJobType('fire')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='fire'?'var(--red)':'var(--border)'};background:${j.type==='fire'?'var(--red-bg)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-flame" style="font-size:18px;color:var(--red)"></i><span style="font-size:13px;font-weight:500">Fire Damage</span>
+          </div>
+          <div onclick="setJobType('mold')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='mold'?'var(--teal)':'var(--border)'};background:${j.type==='mold'?'var(--teal-bg)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-leaf" style="font-size:18px;color:var(--teal)"></i><span style="font-size:13px;font-weight:500">Mold</span>
+          </div>
+          <div onclick="setJobType('storm')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='storm'?'var(--amber)':'var(--border)'};background:${j.type==='storm'?'var(--amber-bg)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-cloud-storm" style="font-size:18px;color:var(--amber)"></i><span style="font-size:13px;font-weight:500">Storm</span>
+          </div>
+          <div onclick="setJobType('other')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='other'?'var(--text)':'var(--border)'};background:${j.type==='other'?'var(--bg3)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-tool" style="font-size:18px;color:var(--text2)"></i><span style="font-size:13px;font-weight:500">Other</span>
+          </div>
+        </div>
+      </div>
+      <div class="ssec">
         <div class="ssec-title">Details</div>
         <div class="srow"><span class="srow-label">Quarter</span><span class="srow-val">${j.q||'—'}</span></div>
         <div class="srow"><span class="srow-label">Start date</span><span class="srow-val">${fmtDate(j.start)}</span></div>
@@ -596,6 +616,21 @@ function renderPhotosTab(j){
 }
 
 // ── DATA MUTATIONS ──
+function setJobType(type){
+  if(!activeJob) return;
+  activeJob.type=type;
+  jobTypes[activeJob.id]=type;
+  const inSheet=sheetJobs.find(j=>j.id===activeJob.id);
+  if(inSheet) inSheet.type=type;
+  const inLocal=localJobs.find(j=>j.id===activeJob.id);
+  if(inLocal) inLocal.type=type;
+  // Save jobTypes to localStorage immediately
+  try{localStorage.setItem('archer_jobTypes',JSON.stringify(jobTypes));}catch(e){}
+  scheduleSave();
+  renderJobs();
+  renderJobTab('overview');
+}
+
 function saveNotes(){if(!activeJob)return;jobNotes[activeJob.id]=document.getElementById('notes-ta').value;scheduleSave();renderJobs();}
 function saveContact(){
   if(!activeJob)return;
@@ -725,6 +760,9 @@ function addJob(){
 }
 
 function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// Load job type overrides from localStorage
+try{jobTypes=JSON.parse(localStorage.getItem('archer_jobTypes'))||{};}catch(e){jobTypes={};}
 
 refreshData();
 setInterval(refreshData,5*60*1000);
