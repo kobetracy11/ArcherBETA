@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="ARCHERBETA">
+<title>ARCHERBETA</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#ffffff;--bg2:#f5f5f4;--bg3:#eeece8;
+  --text:#1a1a1a;--text2:#6b6b6b;--text3:#9e9e9e;
+  --border:rgba(0,0,0,0.12);--border2:rgba(0,0,0,0.22);
+  --blue:#185FA5;--blue-bg:#E6F1FB;
+  --green:#3B6D11;--green-bg:#EAF3DE;--green-border:#C0DD97;
+  --red:#993C1D;--red-bg:#FAECE7;--red-border:#F5C4B3;
+  --amber:#854F0B;--amber-bg:#FAEEDA;
+  --teal:#0F6E56;--teal-bg:#E1F5EE;
+  --radius:8px;--radius-lg:12px;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#1c1c1e;--bg2:#2c2c2e;--bg3:#3a3a3c;
+  --text:#f2f2f7;--text2:#aeaeb2;--text3:#6d6d72;
+  --border:rgba(255,255,255,0.12);--border2:rgba(255,255,255,0.22);
+  --blue:#4a9eff;--blue-bg:#0a2540;
+  --green:#7cc444;--green-bg:#1a2e0a;--green-border:#3b5c15;
+  --red:#ff6b47;--red-bg:#2e0e05;--red-border:#5c2010;
+  --amber:#f5a623;--amber-bg:#2e1e05;
+  --teal:#2ec4a0;--teal-bg:#0a2e25;
+}}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg3);color:var(--text);min-height:100vh;padding-bottom:90px}
+.header{background:var(--bg);border-bottom:0.5px solid var(--border);padding:14px 16px 10px;position:sticky;top:0;z-index:40}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.logo{font-size:17px;font-weight:700;letter-spacing:2px;color:var(--text)}
+.logo span{font-size:10px;color:var(--text3);display:block;letter-spacing:1px;font-weight:400;margin-top:-2px}
+.sync-badge{font-size:10px;padding:3px 9px;border-radius:10px;font-weight:600;display:inline-flex;align-items:center;gap:3px}
+.sync-live{background:var(--green-bg);color:var(--green)}
+.sync-err{background:var(--red-bg);color:var(--red)}
+.sync-loading{background:var(--bg2);color:var(--text3)}
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filter-btn{padding:5px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:0.5px solid var(--border);background:var(--bg);color:var(--text2);white-space:nowrap;flex-shrink:0}
+.filter-btn.active{background:var(--bg2);color:var(--text);border-color:var(--border2)}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:var(--radius);font-size:13px;font-weight:500;cursor:pointer;border:0.5px solid var(--border2);background:var(--bg);color:var(--text);text-decoration:none}
+.btn:active{opacity:0.7}
+.btn-primary{background:var(--blue);color:#fff;border-color:var(--blue)}
+.btn-green{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+.btn-red{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.btn-drive{background:var(--green-bg);color:var(--green);border-color:var(--green-border)}
+.metrics{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;padding:12px 14px 4px}
+.metric{background:var(--bg);border-radius:var(--radius-lg);padding:12px 10px;text-align:center;border:0.5px solid var(--border)}
+.metric-val{font-size:28px;font-weight:700;line-height:1}
+.metric-label{font-size:10px;color:var(--text2);margin-top:3px;font-weight:500}
+.val-blue{color:var(--blue)}.val-green{color:var(--green)}
+.sync-bar{text-align:center;font-size:11px;color:var(--text3);padding:6px 14px 10px;display:flex;align-items:center;justify-content:center;gap:6px}
+.jobs-list{padding:0 14px;display:flex;flex-direction:column;gap:8px}
+.job-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:13px 14px;cursor:pointer}
+.job-card:active{opacity:0.75}
+.jrow{display:flex;align-items:center;gap:10px}
+.jicon{width:38px;height:38px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0}
+.i-water{background:var(--blue-bg);color:var(--blue)}
+.i-fire{background:var(--red-bg);color:var(--red)}
+.i-mold{background:var(--teal-bg);color:var(--teal)}
+.i-storm{background:var(--amber-bg);color:var(--amber)}
+.i-other{background:var(--bg2);color:var(--text2)}
+.jinfo{flex:1;min-width:0}
+.jname{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.jmeta{font-size:11.5px;color:var(--text2);margin-top:3px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.jright{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.pill{padding:3px 10px;border-radius:10px;font-size:11px;font-weight:600;white-space:nowrap}
+.pill-open{background:var(--blue-bg);color:var(--blue)}
+.pill-closed{background:var(--green-bg);color:var(--green)}
+.day-badge{font-size:11px;font-weight:500;color:var(--text2);background:var(--bg2);border:0.5px solid var(--border);padding:2px 8px;border-radius:6px;white-space:nowrap}
+.day-badge.hot{background:var(--red-bg);color:var(--red);border-color:var(--red-border)}
+.bottomnav{position:fixed;bottom:0;left:0;right:0;background:var(--bg);border-top:0.5px solid var(--border);display:flex;z-index:40;padding-bottom:env(safe-area-inset-bottom,10px)}
+.bnav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:10px 4px 8px;cursor:pointer;color:var(--text3);font-size:10px;gap:3px;text-decoration:none;font-weight:500}
+.bnav-item.active{color:var(--blue)}
+.bnav-item i{font-size:22px}
+.sheet-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:50;align-items:flex-end}
+.sheet-overlay.open{display:flex}
+.sheet{background:var(--bg);border-radius:22px 22px 0 0;width:100%;height:96vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px)}
+.sheet-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 10px}
+.sheet-header{padding:0 18px 12px;border-bottom:0.5px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between}
+.sheet-title{font-size:18px;font-weight:700;color:var(--text)}
+.sheet-sub{font-size:12px;color:var(--text2);margin-top:3px}
+.sheet-close{font-size:24px;color:var(--text3);cursor:pointer;padding-left:12px;flex-shrink:0;line-height:1}
+.job-tabs{display:flex;overflow-x:auto;border-bottom:0.5px solid var(--border);padding:0 18px;scrollbar-width:none}
+.job-tabs::-webkit-scrollbar{display:none}
+.job-tab{padding:10px 14px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;flex-shrink:0}
+.job-tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.tab-body{padding:18px}
+.ssec{margin-bottom:20px}
+.ssec-title{font-size:10px;color:var(--text3);letter-spacing:0.6px;text-transform:uppercase;margin-bottom:10px;font-weight:600}
+.big-num{font-size:52px;font-weight:700;color:var(--text);line-height:1}
+.big-label{font-size:13px;color:var(--text2);margin-top:4px}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.srow:last-child{border-bottom:none}
+.srow-label{font-size:13px;color:var(--text2)}
+.srow-val{font-size:13px;font-weight:600;color:var(--text);text-align:right;max-width:65%}
+.drive-strip{display:flex;align-items:center;gap:10px;background:var(--green-bg);border:0.5px solid var(--green-border);border-radius:var(--radius);padding:12px 14px;margin-top:8px}
+.notes-area{width:100%;min-height:160px;padding:12px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:15px;font-family:inherit;resize:none;line-height:1.6}
+.check-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.check-item:last-child{border-bottom:none}
+.check-box{width:22px;height:22px;border-radius:6px;border:2px solid var(--border2);flex-shrink:0;display:flex;align-items:center;justify-content:center;cursor:pointer;background:var(--bg)}
+.check-box.done{background:var(--blue);border-color:var(--blue);color:#fff}
+.check-text{flex:1;font-size:14px;color:var(--text)}
+.check-text.done{text-decoration:line-through;color:var(--text3)}
+.check-del{font-size:18px;color:var(--text3);cursor:pointer;padding:4px;flex-shrink:0}
+.check-input-row{display:flex;gap:8px;margin-top:12px}
+.check-input-row input{flex:1;padding:11px 13px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:15px;font-family:inherit}
+.est-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:0.5px solid var(--border)}
+.est-item:last-child{border-bottom:none}
+.est-icon{width:36px;height:36px;border-radius:var(--radius);background:var(--red-bg);color:var(--red);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.tc-employee{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:10px}
+.tc-emp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.tc-emp-name{font-size:15px;font-weight:700;color:var(--text)}
+.tc-emp-hours{font-size:13px;color:var(--text2)}
+.tc-entry{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:0.5px solid var(--border);font-size:13px}
+.tc-entry:last-child{border-bottom:none}
+.tc-total{font-size:13px;font-weight:700;color:var(--blue);margin-top:8px;text-align:right}
+.emp-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.emp-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.emp-name{font-size:15px;font-weight:600;color:var(--text)}
+.emp-role{font-size:12px;color:var(--text2);margin-top:2px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:60;align-items:flex-end}
+.modal-overlay.open{display:flex}
+.modal{background:var(--bg);border-radius:22px 22px 0 0;width:100%;max-height:92vh;overflow-y:auto;padding-bottom:env(safe-area-inset-bottom,16px)}
+.modal-handle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:12px auto 0}
+.modal-header{padding:14px 18px;border-bottom:0.5px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.modal-title{font-size:18px;font-weight:700}
+.modal-body{padding:18px}
+.field{margin-bottom:14px}
+.field label{font-size:12px;color:var(--text2);display:block;margin-bottom:5px;font-weight:600}
+.field input,.field select,.field textarea{width:100%;padding:12px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:16px;font-family:inherit;-webkit-appearance:none;appearance:none}
+.field textarea{resize:none;height:80px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.modal-footer{padding:12px 18px;border-top:0.5px solid var(--border);display:flex;gap:10px}
+.modal-footer .btn{flex:1;justify-content:center;padding:12px}
+.info-box{background:var(--blue-bg);border-radius:var(--radius);padding:10px 13px;font-size:12px;color:var(--blue);margin-bottom:14px}
+.page-inner{padding:14px}
+.page-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:16px;display:flex;align-items:center;justify-content:space-between}
+.cal-card{background:var(--bg);border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-bottom:12px}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-month{font-size:16px;font-weight:700;color:var(--text)}
+.cal-nav{display:flex;gap:6px;align-items:center}
+.cal-nav-btn{width:32px;height:32px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg2);color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px}
+.cal-today-btn{padding:6px 12px;border-radius:8px;border:0.5px solid var(--border);background:var(--bg2);color:var(--blue);cursor:pointer;font-size:12px;font-weight:600;font-family:inherit}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{text-align:center;font-size:10px;font-weight:600;color:var(--text3);padding:4px 0;text-transform:uppercase}
+.cal-day{aspect-ratio:1;border-radius:8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;font-size:13px;cursor:pointer;border:1.5px solid transparent;color:var(--text)}
+.cal-day.other{opacity:0.35}
+.cal-day.today{border-color:var(--blue);font-weight:700}
+.cal-day.selected{background:var(--blue);color:#fff}
+.cal-dots{display:flex;gap:2px;height:5px}
+.cal-dot{width:5px;height:5px;border-radius:50%}
+.cal-dot.ev{background:transparent !important;border:1.5px solid var(--text2);width:6px;height:6px}
+.cal-day.selected .cal-dot.ev{border-color:#fff}
+.cal-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px;padding-top:10px;border-top:0.5px solid var(--border)}
+.cal-legend span{display:inline-flex;align-items:center;gap:4px;font-size:10px;color:var(--text2);font-weight:500}
+.saving-toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:8px 18px;border-radius:20px;font-size:12px;font-weight:500;z-index:999;opacity:0;transition:opacity 0.3s;pointer-events:none}
+.saving-toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">ARCHERBETA <span>RESTORATION</span></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="sync-badge sync-loading" id="sync-badge"><i class="ti ti-refresh" style="font-size:11px"></i>Syncing</span>
+      <a class="btn btn-drive" href="https://drive.google.com/drive/u/0/folders/1ZAtp4mCnBoc8yV6KUVkbitL0RAWI0Dyl" target="_blank" style="padding:6px 10px;font-size:12px">
+        <i class="ti ti-brand-google-drive"></i>Receipts
+      </a>
+    </div>
+  </div>
+  <div class="filters" id="job-filters">
+    <button class="filter-btn active" onclick="setFilter('open',this)">Open</button>
+    <button class="filter-btn" onclick="setFilter('closed',this)">Closed</button>
+    <button class="filter-btn" onclick="setFilter('all',this)">All Jobs</button>
+  </div>
+</div>
+
+<div id="view-jobs">
+  <div class="metrics" id="metrics">
+    <div class="metric"><div class="metric-val val-blue">—</div><div class="metric-label">Open</div></div>
+    <div class="metric"><div class="metric-val val-green">—</div><div class="metric-label">Closed</div></div>
+    <div class="metric"><div class="metric-val">—</div><div class="metric-label">Total</div></div>
+  </div>
+  <div class="sync-bar" id="sync-bar"><i class="ti ti-loader" style="font-size:13px"></i> Connecting…</div>
+  <div id="list-wrap"></div>
+</div>
+
+<div id="view-timecard" style="display:none"><div class="page-inner" id="tc-content"></div></div>
+<div id="view-employees" style="display:none">
+  <div class="page-inner">
+    <div class="page-title">Employees <button class="btn btn-primary" onclick="openAddEmpModal()"><i class="ti ti-plus"></i>Add</button></div>
+    <div id="emp-list"></div>
+  </div>
+</div>
+
+<div id="view-schedule" style="display:none"><div class="page-inner" id="sched-content"></div></div>
+
+<div class="bottomnav">
+  <div class="bnav-item active" id="nav-jobs" onclick="showView('jobs',this)"><i class="ti ti-clipboard-list"></i>Jobs</div>
+  <div class="bnav-item" onclick="showView('schedule',this)"><i class="ti ti-calendar"></i>Schedule</div>
+  <div class="bnav-item" onclick="showView('timecard',this)"><i class="ti ti-clock"></i>Time Cards</div>
+  <div class="bnav-item" onclick="showView('employees',this)"><i class="ti ti-users"></i>Employees</div>
+  <div class="bnav-item" onclick="openNewModal()"><i class="ti ti-circle-plus"></i>New Job</div>
+</div>
+
+<div class="sheet-overlay" id="sheet-overlay" onclick="sheetOutside(event)">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-header">
+      <div><div class="sheet-title" id="sheet-title"></div><div class="sheet-sub" id="sheet-sub"></div></div>
+      <span class="sheet-close" onclick="closeSheet()"><i class="ti ti-x"></i></span>
+    </div>
+    <div class="job-tabs">
+      <div class="job-tab active" onclick="switchJobTab('overview',this)">Overview</div>
+      <div class="job-tab" onclick="switchJobTab('contact',this)">Contact</div>
+      <div class="job-tab" onclick="switchJobTab('notes',this)">Notes</div>
+      <div class="job-tab" onclick="switchJobTab('checklist',this)">Checklist</div>
+      <div class="job-tab" onclick="switchJobTab('estimates',this)">Estimates</div>
+      <div class="job-tab" onclick="switchJobTab('photos',this)">Photos</div>
+    </div>
+    <div class="tab-body" id="tab-body"></div>
+  </div>
+</div>
+
+<!-- New Job Modal -->
+<div class="modal-overlay" id="new-modal" onclick="if(event.target===this)closeModal('new-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><span class="modal-title">New Job</span><span style="font-size:24px;color:var(--text3);cursor:pointer" onclick="closeModal('new-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="modal-body">
+      <div class="info-box"><i class="ti ti-table-plus" style="font-size:14px;vertical-align:-2px"></i> New jobs are added to the Job Cost Sheet automatically — name goes to Column B, start date to Column M.</div>
+      <div class="field"><label>Customer / Job name</label><input id="nj-name" placeholder="Full name or company" autocomplete="off"></div>
+      <div class="grid2">
+        <div class="field" style="margin-bottom:0"><label>Start date</label><input id="nj-date" type="date"></div>
+        <div class="field" style="margin-bottom:0"><label>Job type</label>
+          <select id="nj-type"><option value="water">Water Damage</option><option value="fire">Fire Damage</option><option value="mold">Mold Remediation</option><option value="storm">Storm Damage</option><option value="other">Other</option></select>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:14px">
+        <div class="field" style="margin-bottom:0"><label>Assign crew</label><select id="nj-crew"></select></div>
+        <div class="field" style="margin-bottom:0"><label>Insurance #</label><input id="nj-ins" placeholder="Optional" autocomplete="off"></div>
+      </div>
+      <div class="field" style="margin-top:14px"><label>Initial Notes</label><textarea id="nj-notes" placeholder="Initial damage notes…"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('new-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addJob()"><i class="ti ti-check"></i>Add Job</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add Employee Modal -->
+<div class="modal-overlay" id="emp-modal" onclick="if(event.target===this)closeModal('emp-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><span class="modal-title">Add Employee</span><span style="font-size:24px;color:var(--text3);cursor:pointer" onclick="closeModal('emp-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="modal-body">
+      <div class="field"><label>Full name</label><input id="emp-name" placeholder="e.g. John Smith" autocomplete="off"></div>
+      <div class="field"><label>Role / Title</label><input id="emp-role" placeholder="e.g. Crew Lead, Technician" autocomplete="off"></div>
+      <div class="field"><label>Phone (optional)</label><input id="emp-phone" placeholder="e.g. 208-555-1234" type="tel"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('emp-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addEmployee()"><i class="ti ti-check"></i>Add Employee</button>
+    </div>
+  </div>
+</div>
+
+<!-- Clock Modal -->
+<div class="modal-overlay" id="clock-modal" onclick="if(event.target===this)closeModal('clock-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><span class="modal-title">Log Time Entry</span><span style="font-size:24px;color:var(--text3);cursor:pointer" onclick="closeModal('clock-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="modal-body">
+      <div class="field"><label>Employee</label><select id="ck-emp"></select></div>
+      <div class="grid2">
+        <div class="field" style="margin-bottom:0"><label>Date</label><input id="ck-date" type="date"></div>
+        <div class="field" style="margin-bottom:0"><label>Time in</label><input id="ck-in" type="time"></div>
+      </div>
+      <div class="field" style="margin-top:14px"><label>Time out</label><input id="ck-out" type="time"></div>
+      <div class="field"><label>Job (optional)</label><select id="ck-job"><option value="">— No specific job —</option></select></div>
+      <div class="field"><label>Notes</label><input id="ck-notes" placeholder="Optional note…" autocomplete="off"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('clock-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="submitClock()"><i class="ti ti-clock"></i>Save Entry</button>
+    </div>
+  </div>
+</div>
+
+<!-- Schedule Event Modal -->
+<div class="modal-overlay" id="event-modal" onclick="if(event.target===this)closeModal('event-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><span class="modal-title">Schedule Item</span><span style="font-size:24px;color:var(--text3);cursor:pointer" onclick="closeModal('event-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="modal-body">
+      <div class="field"><label>What</label><input id="ev-title" placeholder="e.g. Moisture check, Pull equipment, Adjuster meeting" autocomplete="off"></div>
+      <div class="grid2">
+        <div class="field" style="margin-bottom:0"><label>Date</label><input id="ev-date" type="date"></div>
+        <div class="field" style="margin-bottom:0"><label>Time (optional)</label><input id="ev-time" type="time"></div>
+      </div>
+      <div class="field" style="margin-top:14px"><label>Job (optional)</label><select id="ev-job"><option value="">— No specific job —</option></select></div>
+      <div class="field"><label>Notes</label><input id="ev-notes" placeholder="Optional note…" autocomplete="off"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('event-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addSchedEvent()"><i class="ti ti-calendar-plus"></i>Schedule</button>
+    </div>
+  </div>
+</div>
+
+<div class="saving-toast" id="saving-toast">Saving…</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxzO1ttpZrgD_c7aVuDgG10xpPrxu90a7Md1DCOii94qFwPDmjkH_IN2n5pPLBvya-/exec';
+const DRIVE  = 'https://drive.google.com/drive/u/0/folders/1ZAtp4mCnBoc8yV6KUVkbitL0RAWI0Dyl';
+const PHOTOS = 'https://drive.google.com/drive/u/0/folders/1kFpeUpQHp_sjDSkk2ueWw7nCTnNKdCpS';
+const TODAY  = new Date(); TODAY.setHours(0,0,0,0);
+
+const typeIcon  = {water:'ti-droplet',fire:'ti-flame',mold:'ti-leaf',storm:'ti-cloud-storm',other:'ti-tool'};
+const typeCls   = {water:'i-water',fire:'i-fire',mold:'i-mold',storm:'i-storm',other:'i-other'};
+const typeLabel = {water:'Water Damage',fire:'Fire Damage',mold:'Mold Remediation',storm:'Storm Damage',other:'Other'};
+
+// ── STATE ──
+let sheetJobs=[], localJobs=[], currentFilter='open', activeJob=null;
+let jobNotes={}, jobChecklists={}, jobEstimates={}, jobContacts={}, jobTypes={}, jobMeta={};
+let schedItems=[], evNextId=1;
+let calY=new Date().getFullYear(), calM=new Date().getMonth(), calSel=null;
+let employees=[], timeEntries=[];
+let nextId=10000, empNextId=1, tcNextId=1;
+let lastSync=null, saveTimer=null;
+
+// ── HELPERS ──
+function guessType(n){n=n.toLowerCase();if(n.includes('roof')||n.includes('hail')||n.includes('storm'))return 'storm';if(n.includes('fire')||n.includes('smoke')||n.includes('lunchroom'))return 'fire';if(n.includes('mold'))return 'mold';return 'water';}
+function daysBetween(a,b){return Math.max(0,Math.round(Math.abs(new Date(b+'T00:00:00')-new Date(a+'T00:00:00'))/864e5));}
+function daysOpen(s){if(!s)return null;return Math.max(0,Math.round((TODAY-new Date(s+'T00:00:00'))/864e5));}
+function fmtDate(s){if(!s)return '—';try{return new Date(s+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});}catch(e){return s;}}
+function fmtTime(t){if(!t)return '—';try{const[h,m]=t.split(':');const hh=parseInt(h);return(hh%12||12)+':'+m+(hh>=12?' PM':' AM');}catch(e){return t;}}
+function calcHours(i,o){if(!i||!o)return null;const[ih,im]=i.split(':').map(Number);const[oh,om]=o.split(':').map(Number);const mins=(oh*60+om)-(ih*60+im);return mins>0?(mins/60).toFixed(1):null;}
+function timeAgo(d){if(!d)return '';const m=Math.round((new Date()-d)/60000);if(m<1)return 'just now';if(m<60)return m+'m ago';return Math.round(m/60)+'h ago';}
+function initials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().substring(0,2);}
+function avatarBg(n){const c=['#E6F1FB','#E1F5EE','#FAEEDA','#FAECE7','#EAF3DE'];return c[n.charCodeAt(0)%c.length];}
+function avatarFg(n){const c=['#185FA5','#0F6E56','#854F0B','#993C1D','#3B6D11'];return c[n.charCodeAt(0)%c.length];}
+function setSyncBadge(s){const b=document.getElementById('sync-badge');b.className='sync-badge';if(s==='live'){b.classList.add('sync-live');b.innerHTML='<i class="ti ti-circle-check" style="font-size:11px"></i> Live';}if(s==='error'){b.classList.add('sync-err');b.innerHTML='<i class="ti ti-alert-circle" style="font-size:11px"></i> Offline';}if(s==='loading'){b.classList.add('sync-loading');b.innerHTML='<i class="ti ti-refresh" style="font-size:11px"></i> Syncing';}}
+function showToast(msg){const t=document.getElementById('saving-toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000);}
+
+// ── API CALLS ──
+async function apiGet(action){
+  const res=await fetch(SCRIPT_URL+'?action='+action,{method:'GET',mode:'cors'});
+  return await res.json();
+}
+async function apiPost(sheet,data){
+  await fetch(SCRIPT_URL,{method:'POST',mode:'cors',body:JSON.stringify({action:'save',sheet,data})});
+}
+async function apiPostJson(payload){
+  const res=await fetch(SCRIPT_URL,{method:'POST',mode:'cors',body:JSON.stringify(payload)});
+  return await res.json();
+}
+
+// ── LOAD FROM SHEET ──
+async function refreshData(){
+  setSyncBadge('loading');
+  document.getElementById('sync-bar').innerHTML='<i class="ti ti-loader" style="font-size:13px"></i> Syncing…';
+  try{
+    // Load jobs from Front Page
+    const jobs = await apiGet('getJobs');
+    if(Array.isArray(jobs)){
+      sheetJobs=jobs.filter(r=>r&&r.name).map((r,i)=>({id:i+1,name:r.name.trim(),q:r.quarter||'',type:jobTypes[i+1]||guessType(r.name),crew:'',start:r.start||'',closed:r.closed,closeDate:r.closeDate||'',fromSheet:true}));
+    }
+    // Load app data
+    const data = await apiGet('getData');
+    if(data && !data.error){
+      // Employees
+      employees=(data.Employees||[]).map(r=>({id:parseInt(r[0])||Date.now(),name:r[1]||'',role:r[2]||'',phone:r[3]||''})).filter(e=>e.name);
+      empNextId=employees.length>0?Math.max(...employees.map(e=>e.id))+1:1;
+      // Notes
+      jobNotes={};(data.Notes||[]).forEach(r=>{if(r[0])jobNotes[r[0]]=r[1]||'';});
+      // Contacts
+      jobContacts={};(data.Contacts||[]).forEach(r=>{if(r[0])jobContacts[r[0]]={name:r[1]||'',phone:r[2]||'',email:r[3]||'',address:r[4]||'',agent:r[5]||'',adjuster:r[6]||'',claim:r[7]||''};});
+      // Checklists
+      jobChecklists={};(data.Checklists||[]).forEach(r=>{if(!r[0])return;if(!jobChecklists[r[0]])jobChecklists[r[0]]=[];jobChecklists[r[0]].push({id:parseInt(r[1])||Date.now(),text:r[2]||'',done:r[3]==='TRUE'||r[3]===true||r[3]==='true'});});
+      // Estimates
+      jobEstimates={};(data.Estimates||[]).forEach(r=>{if(!r[0])return;if(!jobEstimates[r[0]])jobEstimates[r[0]]=[];jobEstimates[r[0]].push({id:r[1]||'e'+Date.now(),name:r[2]||'',url:r[3]||'',date:r[4]||''});});
+      // Time entries
+      timeEntries=(data.TimeEntries||[]).map(r=>({id:parseInt(r[0])||Date.now(),emp:r[1]||'',date:r[2]||'',inTime:r[3]||'',outTime:r[4]||'',jobName:r[5]||'',notes:r[6]||''}));
+      tcNextId=timeEntries.length>0?Math.max(...timeEntries.map(e=>e.id))+1:1;
+      // Local jobs
+      localJobs=(data.LocalJobs||[]).map(r=>({id:parseInt(r[0]),name:r[1]||'',type:r[2]||'other',crew:r[3]||'',q:r[4]||'',start:r[5]||'',closed:r[6]==='TRUE'||r[6]===true||r[6]==='true',closeDate:r[7]||'',ins:r[8]||'',fromSheet:false})).filter(j=>j.name);
+      nextId=localJobs.length>0?Math.max(...localJobs.map(j=>j.id))+1:10000;
+      // Job meta (type/crew/insurance for sheet jobs — syncs across devices)
+      jobMeta={};(data.JobMeta||[]).forEach(r=>{if(r[0])jobMeta[r[0]]={type:r[1]||'',crew:r[2]||'',ins:r[3]||''};});
+      sheetJobs.forEach(j=>{const m=jobMeta[j.id];if(!m)return;if(m.type&&!jobTypes[j.id])j.type=m.type;if(m.crew)j.crew=m.crew;if(m.ins)j.ins=m.ins;});
+      // Scheduled items
+      schedItems=(data.Schedule||[]).map(r=>({id:parseInt(r[0])||Date.now(),date:r[1]||'',time:r[2]||'',title:r[3]||'',jobName:r[4]||'',notes:r[5]||''})).filter(e=>e.date&&e.title);
+      evNextId=schedItems.length>0?Math.max(...schedItems.map(e=>e.id))+1:1;
+    }
+    lastSync=new Date();
+    setSyncBadge('live');
+    document.getElementById('sync-bar').innerHTML='<i class="ti ti-circle-check" style="font-size:13px;color:var(--green)"></i> Live · '+timeAgo(lastSync);
+    populateSelects();
+  }catch(e){
+    setSyncBadge('error');
+    document.getElementById('sync-bar').innerHTML='<i class="ti ti-alert-circle" style="font-size:13px;color:var(--red)"></i> Could not sync — tap Refresh to try again';
+  }
+  renderJobs();
+  if(document.getElementById('view-schedule').style.display!=='none')renderSchedule();
+}
+
+// ── SAVE TO SHEET ──
+function scheduleSave(){
+  showToast('Saving…');
+  clearTimeout(saveTimer);
+  saveTimer=setTimeout(saveAll,1500);
+}
+
+async function saveAll(){
+  try{
+    // Employees
+    const empData=[['id','name','role','phone'],...employees.map(e=>[e.id,e.name,e.role,e.phone])];
+    await apiPost('Employees',empData);
+    // Notes
+    const notesData=[['jobId','notes'],...Object.entries(jobNotes).map(([k,v])=>[k,v])];
+    await apiPost('Notes',notesData);
+    // Contacts
+    const contactData=[['jobId','name','phone','email','address','agent','adjuster','claim'],...Object.entries(jobContacts).map(([k,v])=>[k,v.name,v.phone,v.email,v.address,v.agent,v.adjuster||'',v.claim])];
+    await apiPost('Contacts',contactData);
+    // Checklists
+    const checkData=[['jobId','id','text','done']];
+    Object.entries(jobChecklists).forEach(([jobId,items])=>items.forEach(c=>checkData.push([jobId,c.id,c.text,c.done])));
+    await apiPost('Checklists',checkData);
+    // Estimates
+    const estData=[['jobId','id','name','url','date']];
+    Object.entries(jobEstimates).forEach(([jobId,items])=>items.forEach(e=>estData.push([jobId,e.id,e.name,e.url,e.date])));
+    await apiPost('Estimates',estData);
+    // Time entries
+    const tcData=[['id','emp','date','inTime','outTime','jobName','notes'],...timeEntries.map(e=>[e.id,e.emp,e.date,e.inTime,e.outTime,e.jobName,e.notes])];
+    await apiPost('TimeEntries',tcData);
+    // Local jobs
+    const ljData=[['id','name','type','crew','quarter','start','closed','closeDate','ins'],...localJobs.map(j=>[j.id,j.name,j.type,j.crew,j.q,j.start,j.closed,j.closeDate,j.ins])];
+    await apiPost('LocalJobs',ljData);
+    // Job meta
+    const metaData=[['jobId','type','crew','ins'],...Object.entries(jobMeta).map(([k,v])=>[k,v.type||'',v.crew||'',v.ins||''])];
+    await apiPost('JobMeta',metaData);
+    // Scheduled items
+    const schedData=[['id','date','time','title','jobName','notes'],...schedItems.map(e=>[e.id,e.date,e.time,e.title,e.jobName,e.notes])];
+    await apiPost('Schedule',schedData);
+    showToast('Saved ✓');
+  }catch(e){showToast('Save failed — check connection');}
+}
+
+// ── SELECTS ──
+function populateSelects(){
+  const empOpts=employees.length===0?'<option value="">— Add employees first —</option>':employees.map(e=>`<option>${e.name}</option>`).join('');
+  ['nj-crew','ck-emp'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=empOpts;});
+  const ckJob=document.getElementById('ck-job');
+  if(ckJob){ckJob.innerHTML='<option value="">— No specific job —</option>';getAllJobs().filter(j=>!j.closed).forEach(j=>{const o=document.createElement('option');o.value=j.name;o.textContent=j.name;ckJob.appendChild(o);});}
+}
+
+// ── JOBS ──
+function getAllJobs(){
+  // Hide local copies of jobs that now exist in the cost sheet (same name + start date)
+  const inSheet=new Set(sheetJobs.map(j=>j.name.toLowerCase()+'|'+(j.start||'')));
+  return[...sheetJobs,...localJobs.filter(j=>!inSheet.has((j.name||'').toLowerCase()+'|'+(j.start||'')))];
+}
+function getFiltered(){const all=getAllJobs();if(currentFilter==='open')return all.filter(j=>!j.closed);if(currentFilter==='closed')return all.filter(j=>j.closed);return all;}
+
+function renderJobs(){
+  const all=getAllJobs();
+  const open=all.filter(j=>!j.closed).length;
+  const closed=all.filter(j=>j.closed).length;
+  document.getElementById('metrics').innerHTML=`
+    <div class="metric"><div class="metric-val val-blue">${open}</div><div class="metric-label">Open</div></div>
+    <div class="metric"><div class="metric-val val-green">${closed}</div><div class="metric-label">Closed</div></div>
+    <div class="metric"><div class="metric-val">${all.length}</div><div class="metric-label">Total</div></div>`;
+  const items=getFiltered();
+  const wrap=document.getElementById('list-wrap');
+  if(!items.length){wrap.innerHTML='<div style="text-align:center;color:var(--text3);padding:50px 20px;font-size:14px">'+(sheetJobs.length===0?'Tap Refresh to load jobs.':'No jobs in this view.')+'</div>';return;}
+  wrap.innerHTML='<div class="jobs-list">'+items.map(j=>{
+    const days=j.closed&&j.closeDate&&j.start?daysBetween(j.start,j.closeDate):j.start?daysOpen(j.start):null;
+    const hot=!j.closed&&days!==null&&days>14;
+    const badge=j.closed&&j.closeDate&&j.start?days+'d job':j.closed?'Closed':days!==null?'Day '+days:'—';
+    const cc=(jobChecklists[j.id]||[]).length;
+    const dc=(jobChecklists[j.id]||[]).filter(c=>c.done).length;
+    const hn=jobNotes[j.id]&&jobNotes[j.id].trim()!=='';
+    return`<div class="job-card" onclick="openJobSheet(${j.id})">
+      <div class="jrow">
+        <div class="jicon ${typeCls[j.type]}"><i class="ti ${typeIcon[j.type]}"></i></div>
+        <div class="jinfo">
+          <div class="jname">${j.name}</div>
+          <div class="jmeta">
+            ${j.start?`<span><i class="ti ti-calendar" style="font-size:11px;vertical-align:-1px"></i> ${fmtDate(j.start)}</span>`:'<span style="color:var(--text3)">No start date</span>'}
+            ${j.q?`<span style="background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:10px">${j.q}</span>`:''}
+            ${cc>0?`<span style="background:var(--bg2);padding:1px 6px;border-radius:4px;font-size:10px"><i class="ti ti-check" style="font-size:10px"></i> ${dc}/${cc}</span>`:''}
+            ${hn?`<span style="color:var(--amber)"><i class="ti ti-notes" style="font-size:11px"></i></span>`:''}
+          </div>
+        </div>
+        <div class="jright">
+          <span class="pill ${j.closed?'pill-closed':'pill-open'}">${j.closed?'Closed':'Open'}</span>
+          <span class="day-badge ${hot?'hot':''}">${badge}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+function setFilter(f,btn){currentFilter=f;document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderJobs();}
+
+function openJobSheet(id){
+  activeJob=getAllJobs().find(j=>j.id===id);
+  if(!activeJob)return;
+  document.getElementById('sheet-title').textContent=activeJob.name;
+  document.getElementById('sheet-sub').textContent=typeLabel[activeJob.type]+(activeJob.q?' · '+activeJob.q:'');
+  document.querySelectorAll('.job-tab').forEach((t,i)=>t.classList.toggle('active',i===0));
+  renderJobTab('overview');
+  document.getElementById('sheet-overlay').classList.add('open');
+}
+function closeSheet(){document.getElementById('sheet-overlay').classList.remove('open');}
+function sheetOutside(e){if(e.target===document.getElementById('sheet-overlay'))closeSheet();}
+
+function switchJobTab(tab,el){
+  document.querySelectorAll('.job-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  if(tab==='photos')renderPhotosTab(activeJob);
+  else if(tab==='contact')renderContactTab(activeJob);
+  else renderJobTab(tab);
+}
+
+function renderJobTab(tab){
+  const j=activeJob; if(!j)return;
+  const body=document.getElementById('tab-body');
+  if(tab==='overview'){
+    const days=j.closed&&j.closeDate&&j.start?daysBetween(j.start,j.closeDate):j.start?daysOpen(j.start):null;
+    body.innerHTML=`
+      <div class="ssec">
+        <div style="display:flex;align-items:flex-end;gap:16px;margin-bottom:10px">
+          <div><div class="big-num">${days!==null?days:'—'}</div><div class="big-label">${j.closed&&j.closeDate?'days (job duration)':'days since start'}</div></div>
+          <span class="pill ${j.closed?'pill-closed':'pill-open'}" style="font-size:13px;padding:5px 14px;margin-bottom:6px">${j.closed?'Closed':'Open'}</span>
+        </div>
+      </div>
+      <div class="ssec">
+        <div class="ssec-title">Job Type</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div onclick="setJobType('water')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='water'?'var(--blue)':'var(--border)'};background:${j.type==='water'?'var(--blue-bg)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-droplet" style="font-size:18px;color:var(--blue)"></i><span style="font-size:13px;font-weight:500">Water Damage</span>
+          </div>
+          <div onclick="setJobType('fire')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='fire'?'var(--red)':'var(--border)'};background:${j.type==='fire'?'var(--red-bg)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-flame" style="font-size:18px;color:var(--red)"></i><span style="font-size:13px;font-weight:500">Fire Damage</span>
+          </div>
+          <div onclick="setJobType('mold')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='mold'?'var(--teal)':'var(--border)'};background:${j.type==='mold'?'var(--teal-bg)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-leaf" style="font-size:18px;color:var(--teal)"></i><span style="font-size:13px;font-weight:500">Mold</span>
+          </div>
+          <div onclick="setJobType('storm')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='storm'?'var(--amber)':'var(--border)'};background:${j.type==='storm'?'var(--amber-bg)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-cloud-storm" style="font-size:18px;color:var(--amber)"></i><span style="font-size:13px;font-weight:500">Storm</span>
+          </div>
+          <div onclick="setJobType('other')" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--radius);border:2px solid ${j.type==='other'?'var(--text)':'var(--border)'};background:${j.type==='other'?'var(--bg3)':'var(--bg2)'};cursor:pointer">
+            <i class="ti ti-tool" style="font-size:18px;color:var(--text2)"></i><span style="font-size:13px;font-weight:500">Other</span>
+          </div>
+        </div>
+      </div>
+      <div class="ssec">
+        <div class="ssec-title">Details</div>
+        <div class="srow"><span class="srow-label">Quarter</span><span class="srow-val">${j.q||'—'}</span></div>
+        <div class="srow"><span class="srow-label">Start date</span><input type="date" id="ov-start" value="${j.start||''}" onchange="updateStartDate(this.value)" style="padding:8px 10px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:14px;font-family:inherit;-webkit-appearance:none;appearance:none"></div>
+        ${j.closed&&j.closeDate?`<div class="srow"><span class="srow-label">Date completed</span><span class="srow-val">${fmtDate(j.closeDate)}</span></div>`:''}
+        ${j.crew?`<div class="srow"><span class="srow-label">Assigned to</span><span class="srow-val">${j.crew}</span></div>`:''}
+        ${j.ins?`<div class="srow"><span class="srow-label">Insurance #</span><span class="srow-val">${j.ins}</span></div>`:''}
+      </div>
+      ${!j.fromSheet?`<div class="ssec">
+        <div class="info-box" style="background:var(--amber-bg);color:var(--amber)"><i class="ti ti-alert-triangle" style="font-size:14px;vertical-align:-2px"></i> This job only exists in the app — it's not in the Job Cost Sheet yet.</div>
+        <button class="btn btn-primary" onclick="pushLocalJob()" style="width:100%;justify-content:center;padding:12px"><i class="ti ti-table-plus"></i>Add to Job Cost Sheet</button>
+      </div>`:''}
+      <div class="drive-strip">
+        <i class="ti ti-brand-google-drive" style="font-size:22px;color:var(--green);flex-shrink:0"></i>
+        <div style="flex:1;font-size:13px;font-weight:600;color:var(--green)">Job Receipts Folder</div>
+        <a href="${DRIVE}" target="_blank" class="btn btn-drive" style="font-size:12px;padding:7px 11px"><i class="ti ti-external-link"></i>Open</a>
+      </div>`;
+  } else if(tab==='notes'){
+    if(!jobNotes[j.id])jobNotes[j.id]='';
+    body.innerHTML=`
+      <div class="ssec">
+        <div class="ssec-title">Job Notes</div>
+        <textarea class="notes-area" id="notes-ta" placeholder="Damage description, adjuster info, access instructions…" oninput="saveNotes()">${jobNotes[j.id]}</textarea>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px;text-align:right">Syncs to shared sheet automatically</div>
+      </div>`;
+  } else if(tab==='checklist'){
+    if(!jobChecklists[j.id])jobChecklists[j.id]=[];
+    const items=jobChecklists[j.id];
+    const done=items.filter(c=>c.done).length;
+    body.innerHTML=`
+      <div class="ssec">
+        <div class="ssec-title" style="display:flex;justify-content:space-between">Checklist <span>${done}/${items.length} done</span></div>
+        <div id="checklist-items">
+          ${items.length===0?'<div style="color:var(--text3);font-size:13px;padding:10px 0">No items yet.</div>':''}
+          ${items.map(c=>`<div class="check-item">
+            <div class="check-box ${c.done?'done':''}" onclick="toggleCheck(${c.id})">${c.done?'<i class="ti ti-check" style="font-size:13px"></i>':''}</div>
+            <span class="check-text ${c.done?'done':''}">${c.text}</span>
+            <span class="check-del" onclick="deleteCheck(${c.id})"><i class="ti ti-x"></i></span>
+          </div>`).join('')}
+        </div>
+        <div class="check-input-row">
+          <input id="check-new" placeholder="Add checklist item…" onkeydown="if(event.key==='Enter')addCheck()">
+          <button class="btn btn-primary" onclick="addCheck()"><i class="ti ti-plus"></i>Add</button>
+        </div>
+      </div>`;
+  } else if(tab==='estimates'){
+    if(!jobEstimates[j.id])jobEstimates[j.id]=[];
+    const ests=jobEstimates[j.id];
+    body.innerHTML=`
+      <div class="ssec">
+        <div class="ssec-title">Estimates & Documents</div>
+        ${ests.length===0?'<div style="color:var(--text3);font-size:13px;padding:10px 0 16px">No estimates added yet.</div>':''}
+        ${ests.map(e=>`<div class="est-item">
+          <div class="est-icon"><i class="ti ti-file-type-pdf"></i></div>
+          <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:500">${e.name}</div><div style="font-size:11px;color:var(--text3)">${e.date}</div></div>
+          ${e.url?`<a href="${e.url}" target="_blank" class="btn" style="font-size:12px;padding:5px 9px"><i class="ti ti-external-link"></i>Open</a>`:''}
+          <span style="font-size:18px;color:var(--text3);cursor:pointer;padding:4px" onclick="deleteEst('${e.id}')"><i class="ti ti-x"></i></span>
+        </div>`).join('')}
+        <div class="info-box"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> Upload PDFs to your Google Drive Receipts folder, then paste the link below.</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <input id="est-name" placeholder="Estimate name" style="width:100%;padding:12px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:15px;font-family:inherit">
+          <input id="est-url" placeholder="Paste Google Drive link…" style="width:100%;padding:12px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:15px;font-family:inherit">
+          <button class="btn btn-primary" onclick="addEstimate()" style="justify-content:center;padding:12px"><i class="ti ti-plus"></i>Add Estimate</button>
+        </div>
+      </div>`;
+  }
+}
+
+function renderContactTab(j){
+  if(!jobContacts[j.id])jobContacts[j.id]={name:'',phone:'',email:'',address:'',agent:'',adjuster:'',claim:''};
+  const c=jobContacts[j.id];
+  const body=document.getElementById('tab-body');
+  body.innerHTML=`
+    <div class="ssec">
+      <div class="ssec-title">Customer Contact</div>
+      <div class="field"><label>Full Name</label><input id="ct-name" placeholder="Customer full name" value="${c.name}" oninput="saveContact()"></div>
+      <div class="field"><label>Phone Number</label>
+        <div style="display:flex;gap:8px">
+          <input id="ct-phone" placeholder="208-555-1234" value="${c.phone}" type="tel" oninput="saveContact()" style="flex:1;padding:12px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:16px;font-family:inherit">
+          ${c.phone?`<a href="tel:${c.phone}" class="btn btn-green" style="padding:12px 14px;flex-shrink:0"><i class="ti ti-phone"></i>Call</a>`:''}
+        </div>
+      </div>
+      <div class="field"><label>Email</label>
+        <div style="display:flex;gap:8px">
+          <input id="ct-email" placeholder="name@email.com" value="${c.email}" type="email" oninput="saveContact()" style="flex:1;padding:12px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:16px;font-family:inherit">
+          ${c.email?`<a href="mailto:${c.email}" class="btn btn-green" style="padding:12px 14px;flex-shrink:0"><i class="ti ti-mail"></i>Email</a>`:''}
+        </div>
+      </div>
+      <div class="field"><label>Property Address</label>
+        <textarea id="ct-address" placeholder="Full property address" oninput="saveContact()" style="width:100%;padding:12px 14px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg2);color:var(--text);font-size:16px;font-family:inherit;resize:none;height:80px">${c.address}</textarea>
+        ${c.address?`<a href="https://maps.google.com?q=${encodeURIComponent(c.address)}" target="_blank" class="btn btn-green" style="width:100%;justify-content:center;margin-top:8px;padding:12px"><i class="ti ti-map-pin"></i>Open in Maps</a>`:''}
+      </div>
+    </div>
+    <div class="ssec">
+      <div class="ssec-title">Insurance Info</div>
+      <div class="field"><label>Agent Name</label><input id="ct-agent" placeholder="Insurance agent name" value="${c.agent}" oninput="saveContact()"></div>
+      <div class="field"><label>Adjuster Name</label><input id="ct-adjuster" placeholder="Insurance adjuster name" value="${c.adjuster||''}" oninput="saveContact()"></div>
+      <div class="field"><label>Claim Number</label><input id="ct-claim" placeholder="e.g. CLM-123456" value="${c.claim}" oninput="saveContact()"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);text-align:right">Syncs to shared sheet automatically</div>`;
+}
+
+function renderPhotosTab(j){
+  const body=document.getElementById('tab-body');
+  body.innerHTML=`
+    <div class="ssec">
+      <div class="ssec-title">Job Photos</div>
+      <div class="info-box"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> Upload photos to the <strong>${j.name}</strong> folder in your ARCHER Job Photos Drive folder.</div>
+      <a href="${PHOTOS}" target="_blank" class="btn btn-green" style="width:100%;justify-content:center;padding:13px;font-size:14px;margin-bottom:12px">
+        <i class="ti ti-brand-google-drive"></i> Open ARCHER Job Photos Folder
+      </a>
+      <div style="background:var(--bg2);border-radius:var(--radius);padding:12px;font-size:13px;color:var(--text2);line-height:1.8">
+        1. Tap <strong>Open ARCHER Job Photos Folder</strong><br>
+        2. Open or create folder named <strong>${j.name}</strong><br>
+        3. Tap <strong>+</strong> → <strong>Upload</strong><br>
+        4. Select photos from your camera roll
+      </div>
+    </div>`;
+}
+
+// ── DATA MUTATIONS ──
+function setJobType(type){
+  if(!activeJob) return;
+  activeJob.type=type;
+  jobTypes[activeJob.id]=type;
+  if(!jobMeta[activeJob.id])jobMeta[activeJob.id]={type:'',crew:'',ins:''};
+  jobMeta[activeJob.id].type=type;
+  const inSheet=sheetJobs.find(j=>j.id===activeJob.id);
+  if(inSheet) inSheet.type=type;
+  const inLocal=localJobs.find(j=>j.id===activeJob.id);
+  if(inLocal) inLocal.type=type;
+  // Save jobTypes to localStorage immediately
+  try{localStorage.setItem('archer_jobTypes',JSON.stringify(jobTypes));}catch(e){}
+  scheduleSave();
+  renderJobs();
+  renderJobTab('overview');
+}
+
+function saveNotes(){if(!activeJob)return;jobNotes[activeJob.id]=document.getElementById('notes-ta').value;scheduleSave();renderJobs();}
+
+// ── START DATE EDIT ──
+async function updateStartDate(v){
+  if(!activeJob||!v)return;
+  activeJob.start=v;
+  if(activeJob.fromSheet){
+    showToast('Updating Job Cost Sheet…');
+    try{
+      const out=await apiPostJson({action:'updateJob',id:activeJob.id,name:activeJob.name,start:v});
+      if(!out||!out.ok)throw new Error((out&&out.error)||'update failed');
+      showToast('Start date updated in cost sheet ✓');
+    }catch(e){showToast('Could not update cost sheet');}
+  }else{
+    const lj=localJobs.find(j=>j.id===activeJob.id);
+    if(lj)lj.start=v;
+    scheduleSave();
+  }
+  renderJobs();
+  renderJobTab('overview');
+}
+
+// ── PUSH LOCAL JOB TO COST SHEET ──
+async function pushLocalJob(){
+  const j=activeJob;
+  if(!j||j.fromSheet)return;
+  if(!j.start){alert('Set a start date first, then add it to the cost sheet.');return;}
+  showToast('Adding to Job Cost Sheet…');
+  try{
+    const out=await apiPostJson({action:'addJob',name:j.name,start:j.start});
+    if(!out||!out.ok)throw new Error((out&&out.error)||'addJob failed');
+    const newId=out.id, oldId=j.id;
+    // Move everything attached to this job over to its new sheet id
+    jobMeta[newId]={type:j.type,crew:j.crew||'',ins:j.ins||''};
+    jobTypes[newId]=j.type;
+    try{localStorage.setItem('archer_jobTypes',JSON.stringify(jobTypes));}catch(e){}
+    if(jobNotes[oldId]){jobNotes[newId]=jobNotes[oldId];delete jobNotes[oldId];}
+    if(jobChecklists[oldId]){jobChecklists[newId]=jobChecklists[oldId];delete jobChecklists[oldId];}
+    if(jobEstimates[oldId]){jobEstimates[newId]=jobEstimates[oldId];delete jobEstimates[oldId];}
+    if(jobContacts[oldId]){jobContacts[newId]=jobContacts[oldId];delete jobContacts[oldId];}
+    localJobs=localJobs.filter(x=>x.id!==oldId);
+    await saveAll();
+    closeSheet();
+    showToast('Added to Job Cost Sheet ✓');
+    await refreshData();
+  }catch(e){
+    showToast('Could not reach the cost sheet');
+    alert('Could not add this job to the Job Cost Sheet. Check your connection and that the latest script is deployed, then try again.');
+  }
+}
+function saveContact(){
+  if(!activeJob)return;
+  if(!jobContacts[activeJob.id])jobContacts[activeJob.id]={name:'',phone:'',email:'',address:'',agent:'',adjuster:'',claim:''};
+  const c=jobContacts[activeJob.id];
+  c.name=document.getElementById('ct-name').value;
+  c.phone=document.getElementById('ct-phone').value;
+  c.email=document.getElementById('ct-email').value;
+  c.address=document.getElementById('ct-address').value;
+  c.agent=document.getElementById('ct-agent').value;
+  c.adjuster=document.getElementById('ct-adjuster').value;
+  c.claim=document.getElementById('ct-claim').value;
+  scheduleSave();
+}
+function addCheck(){const inp=document.getElementById('check-new');const text=inp.value.trim();if(!text||!activeJob)return;if(!jobChecklists[activeJob.id])jobChecklists[activeJob.id]=[];jobChecklists[activeJob.id].push({id:Date.now(),text,done:false});inp.value='';scheduleSave();renderJobTab('checklist');renderJobs();}
+function toggleCheck(id){if(!activeJob)return;const item=jobChecklists[activeJob.id].find(c=>c.id===id);if(item)item.done=!item.done;scheduleSave();renderJobTab('checklist');renderJobs();}
+function deleteCheck(id){if(!activeJob)return;jobChecklists[activeJob.id]=jobChecklists[activeJob.id].filter(c=>c.id!==id);scheduleSave();renderJobTab('checklist');renderJobs();}
+function addEstimate(){const name=document.getElementById('est-name').value.trim();const url=document.getElementById('est-url').value.trim();if(!name||!activeJob)return;if(!jobEstimates[activeJob.id])jobEstimates[activeJob.id]=[];jobEstimates[activeJob.id].push({id:'e'+Date.now(),name,url,date:new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})});scheduleSave();renderJobTab('estimates');}
+function deleteEst(id){if(!activeJob)return;jobEstimates[activeJob.id]=jobEstimates[activeJob.id].filter(e=>e.id!==id);scheduleSave();renderJobTab('estimates');}
+
+// ── EMPLOYEES ──
+function renderEmployees(){
+  const list=document.getElementById('emp-list');
+  if(employees.length===0){list.innerHTML='<div style="text-align:center;color:var(--text3);padding:40px 20px;font-size:14px"><i class="ti ti-users" style="font-size:40px;display:block;margin-bottom:12px"></i>No employees yet.<br>Tap Add to get started.</div>';return;}
+  list.innerHTML=employees.map(e=>`
+    <div class="emp-card">
+      <div class="emp-avatar" style="background:${avatarBg(e.name)};color:${avatarFg(e.name)}">${initials(e.name)}</div>
+      <div style="flex:1;min-width:0">
+        <div class="emp-name">${e.name}</div>
+        <div class="emp-role">${e.role||'No role'}${e.phone?' · '+e.phone:''}</div>
+      </div>
+      <span style="cursor:pointer;padding:4px" onclick="deleteEmployee(${e.id})"><i class="ti ti-trash" style="color:var(--red);font-size:18px"></i></span>
+    </div>`).join('');
+}
+function openAddEmpModal(){['emp-name','emp-role','emp-phone'].forEach(id=>document.getElementById(id).value='');document.getElementById('emp-modal').classList.add('open');}
+function addEmployee(){
+  const name=document.getElementById('emp-name').value.trim();
+  if(!name){alert('Name is required.');return;}
+  employees.push({id:empNextId++,name,role:document.getElementById('emp-role').value.trim(),phone:document.getElementById('emp-phone').value.trim()});
+  closeModal('emp-modal');
+  scheduleSave();
+  renderEmployees();
+  populateSelects();
+}
+function deleteEmployee(id){
+  if(!confirm('Remove this employee?'))return;
+  employees=employees.filter(e=>e.id!==id);
+  scheduleSave();
+  renderEmployees();
+  populateSelects();
+}
+
+// ── TIME CARDS ──
+function renderTimeCards(){
+  const c=document.getElementById('tc-content');
+  if(employees.length===0){c.innerHTML='<div style="text-align:center;color:var(--text3);padding:50px 20px;font-size:14px"><i class="ti ti-clock" style="font-size:40px;display:block;margin-bottom:12px"></i>Add employees first.</div>';return;}
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><span style="font-size:18px;font-weight:700">Time Cards</span><button class="btn btn-primary" onclick="openClockModal()"><i class="ti ti-clock-plus"></i>Log Time</button></div>`;
+  employees.forEach(emp=>{
+    const entries=timeEntries.filter(e=>e.emp===emp.name);
+    const total=entries.reduce((s,e)=>{const h=calcHours(e.inTime,e.outTime);return s+(h?parseFloat(h):0);},0);
+    html+=`<div class="tc-employee">
+      <div class="tc-emp-header"><div><div class="tc-emp-name">${emp.name}</div><div class="tc-emp-hours">${emp.role||''} · ${total.toFixed(1)} hrs</div></div></div>
+      ${entries.length===0?'<div style="font-size:13px;color:var(--text3)">No entries yet.</div>':''}
+      ${entries.slice(-3).reverse().map(e=>`<div class="tc-entry">
+        <div><div style="color:var(--text2)">${e.date}</div><div style="font-size:11px;color:var(--text3)">${e.jobName||'No job'}</div></div>
+        <div style="text-align:right"><div style="font-weight:600">${fmtTime(e.inTime)} → ${e.outTime?fmtTime(e.outTime):'Active'}</div><div style="font-size:11px;color:var(--text3)">${e.outTime?(calcHours(e.inTime,e.outTime)||'0')+' hrs':'In progress'}</div></div>
+      </div>`).join('')}
+      ${entries.length>3?`<div style="font-size:11px;color:var(--text3);text-align:center;padding-top:6px">+${entries.length-3} more</div>`:''}
+      <div class="tc-total">Total: ${total.toFixed(1)} hrs</div>
+    </div>`;
+  });
+  c.innerHTML=html;
+}
+function openClockModal(){
+  document.getElementById('ck-date').value=new Date().toISOString().split('T')[0];
+  const now=new Date();
+  document.getElementById('ck-in').value=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  document.getElementById('ck-out').value='';
+  document.getElementById('ck-notes').value='';
+  populateSelects();
+  document.getElementById('clock-modal').classList.add('open');
+}
+function submitClock(){
+  const emp=document.getElementById('ck-emp').value;
+  const date=document.getElementById('ck-date').value;
+  const inTime=document.getElementById('ck-in').value;
+  if(!emp||!date||!inTime){alert('Employee, date and time in are required.');return;}
+  timeEntries.push({id:tcNextId++,emp,date,inTime,outTime:document.getElementById('ck-out').value,jobName:document.getElementById('ck-job').value,notes:document.getElementById('ck-notes').value});
+  closeModal('clock-modal');
+  scheduleSave();
+  renderTimeCards();
+}
+
+// ── VIEWS ──
+function showView(v,el){
+  document.querySelectorAll('.bnav-item').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('view-jobs').style.display=v==='jobs'?'block':'none';
+  document.getElementById('view-schedule').style.display=v==='schedule'?'block':'none';
+  document.getElementById('view-timecard').style.display=v==='timecard'?'block':'none';
+  document.getElementById('view-employees').style.display=v==='employees'?'block':'none';
+  document.getElementById('job-filters').style.display=v==='jobs'?'flex':'none';
+  if(v==='schedule')renderSchedule();
+  if(v==='timecard')renderTimeCards();
+  if(v==='employees')renderEmployees();
+}
+
+// ── SCHEDULE / CALENDAR ──
+const dotColor={water:'var(--blue)',fire:'var(--red)',mold:'var(--teal)',storm:'var(--amber)',other:'var(--text3)'};
+function toISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function calShift(n){calM+=n;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderSchedule();}
+function calToday(){calY=TODAY.getFullYear();calM=TODAY.getMonth();calSel=toISO(TODAY);renderSchedule();}
+function calSelect(d){calSel=d;renderSchedule();}
+function schedEvents(){
+  const ev={};
+  getAllJobs().forEach(j=>{
+    if(j.start)(ev[j.start]=ev[j.start]||[]).push({j,kind:'start'});
+    if(j.closed&&j.closeDate)(ev[j.closeDate]=ev[j.closeDate]||[]).push({j,kind:'done'});
+  });
+  schedItems.forEach(e=>{(ev[e.date]=ev[e.date]||[]).push({item:e,kind:'event'});});
+  return ev;
+}
+function schedRow(e){
+  if(e.kind==='event'){
+    return`<div class="job-card" style="padding:11px 13px;margin-bottom:8px">
+      <div class="jrow">
+        <div class="jicon" style="width:34px;height:34px;font-size:17px;background:var(--bg2);color:var(--text2)"><i class="ti ti-calendar-event"></i></div>
+        <div class="jinfo">
+          <div class="jname">${e.item.title}</div>
+          <div class="jmeta">${e.item.time?fmtTime(e.item.time)+' · ':''}${e.item.jobName||''}${e.item.notes?' · '+e.item.notes:''}</div>
+        </div>
+        <span style="cursor:pointer;padding:6px" onclick="deleteSchedEvent(${e.item.id})"><i class="ti ti-trash" style="color:var(--red);font-size:17px"></i></span>
+      </div>
+    </div>`;
+  }
+  return`<div class="job-card" onclick="openJobSheet(${e.j.id})" style="padding:11px 13px;margin-bottom:8px">
+    <div class="jrow">
+      <div class="jicon ${typeCls[e.j.type]}" style="width:34px;height:34px;font-size:17px"><i class="ti ${typeIcon[e.j.type]}"></i></div>
+      <div class="jinfo">
+        <div class="jname">${e.j.name}</div>
+        <div class="jmeta">${e.j.crew?e.j.crew+' · ':''}${e.j.closed?'Closed':'Open'}${e.kind==='start'&&e.j.start&&!e.j.closed?' · Day '+daysOpen(e.j.start):''}</div>
+      </div>
+      <span class="pill ${e.kind==='done'?'pill-closed':'pill-open'}">${e.kind==='done'?'Completed':'Started'}</span>
+    </div>
+  </div>`;
+}
+function renderSchedule(){
+  if(!calSel)calSel=toISO(TODAY);
+  const ev=schedEvents();
+  const first=new Date(calY,calM,1);
+  const startDow=first.getDay();
+  const dim=new Date(calY,calM+1,0).getDate();
+  const dimPrev=new Date(calY,calM,0).getDate();
+  const todayISO=toISO(TODAY);
+  let cells='';
+  ['S','M','T','W','T','F','S'].forEach(d=>cells+=`<div class="cal-dow">${d}</div>`);
+  const total=Math.ceil((startDow+dim)/7)*7;
+  for(let i=0;i<total;i++){
+    const dayNum=i-startDow+1;
+    let d,other=false;
+    if(dayNum<1){d=new Date(calY,calM-1,dimPrev+dayNum);other=true;}
+    else if(dayNum>dim){d=new Date(calY,calM+1,dayNum-dim);other=true;}
+    else d=new Date(calY,calM,dayNum);
+    const iso=toISO(d);
+    const evs=ev[iso]||[];
+    const dots=evs.slice(0,3).map(e=>e.kind==='event'?`<span class="cal-dot ev"></span>`:`<span class="cal-dot" style="background:${iso===calSel?'#fff':(e.kind==='done'?'var(--green)':dotColor[e.j.type]||'var(--text3)')}"></span>`).join('');
+    cells+=`<div class="cal-day ${other?'other':''} ${iso===todayISO?'today':''} ${iso===calSel?'selected':''}" onclick="calSelect('${iso}')"><span>${d.getDate()}</span><span class="cal-dots">${dots}</span></div>`;
+  }
+  const sel=(ev[calSel]||[]);
+  // Month agenda: every event this month, in date order
+  const mPrefix=calY+'-'+String(calM+1).padStart(2,'0')+'-';
+  const monthEvs=Object.keys(ev).filter(d=>d.startsWith(mPrefix)).sort().flatMap(d=>ev[d].map(e=>({...e,date:d})));
+  document.getElementById('sched-content').innerHTML=`
+    <div class="cal-card">
+      <div class="cal-head">
+        <div class="cal-month">${first.toLocaleDateString('en-US',{month:'long',year:'numeric'})}</div>
+        <div class="cal-nav">
+          <button class="cal-today-btn" onclick="calToday()">Today</button>
+          <button class="cal-nav-btn" onclick="calShift(-1)"><i class="ti ti-chevron-left"></i></button>
+          <button class="cal-nav-btn" onclick="calShift(1)"><i class="ti ti-chevron-right"></i></button>
+        </div>
+      </div>
+      <div class="cal-grid">${cells}</div>
+      <div class="cal-legend">
+        <span><span class="cal-dot" style="background:var(--blue)"></span>Water</span>
+        <span><span class="cal-dot" style="background:var(--red)"></span>Fire</span>
+        <span><span class="cal-dot" style="background:var(--teal)"></span>Mold</span>
+        <span><span class="cal-dot" style="background:var(--amber)"></span>Storm</span>
+        <span><span class="cal-dot" style="background:var(--green)"></span>Completed</span>
+        <span><span class="cal-dot ev"></span>Scheduled</span>
+      </div>
+    </div>
+    <div style="margin-bottom:14px">
+      <button class="btn btn-primary" onclick="openEventModal()" style="width:100%;justify-content:center;padding:11px"><i class="ti ti-calendar-plus"></i>Schedule Something</button>
+    </div>
+    <div class="ssec-title" style="padding:0 2px">${fmtDate(calSel)}</div>
+    ${sel.length?sel.slice().sort((a,b)=>((a.item&&a.item.time)||'')<((b.item&&b.item.time)||'')?-1:1).map(schedRow).join(''):'<div style="text-align:center;color:var(--text3);font-size:13px;padding:16px 0 24px">Nothing scheduled this day.</div>'}
+    <div class="ssec-title" style="padding:12px 2px 0">This Month</div>
+    ${monthEvs.length?monthEvs.map(e=>`<div onclick="calSelect('${e.date}')" style="display:flex;align-items:center;gap:10px;padding:9px 4px;border-bottom:0.5px solid var(--border);cursor:pointer">
+      <span style="font-size:12px;font-weight:700;color:var(--text2);width:46px;flex-shrink:0">${new Date(e.date+'T00:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span>
+      <span class="cal-dot ${e.kind==='event'?'ev':''}" style="${e.kind==='event'?'':'background:'+(e.kind==='done'?'var(--green)':dotColor[e.j.type])};flex-shrink:0"></span>
+      <span style="flex:1;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${e.kind==='event'?e.item.title+(e.item.jobName?' — '+e.item.jobName:''):e.j.name}</span>
+      <span style="font-size:11px;color:var(--text3);flex-shrink:0">${e.kind==='event'?(e.item.time?fmtTime(e.item.time):'Scheduled'):(e.kind==='done'?'Completed':'Started')}</span>
+    </div>`).join(''):'<div style="text-align:center;color:var(--text3);font-size:13px;padding:16px 0">No job activity this month.</div>'}`;
+}
+
+// ── SCHEDULED ITEMS ──
+function openEventModal(){
+  document.getElementById('ev-title').value='';
+  document.getElementById('ev-date').value=calSel||toISO(TODAY);
+  document.getElementById('ev-time').value='';
+  document.getElementById('ev-notes').value='';
+  const sel=document.getElementById('ev-job');
+  sel.innerHTML='<option value="">— No specific job —</option>';
+  getAllJobs().filter(j=>!j.closed).forEach(j=>{const o=document.createElement('option');o.value=j.name;o.textContent=j.name;sel.appendChild(o);});
+  document.getElementById('event-modal').classList.add('open');
+}
+function addSchedEvent(){
+  const title=document.getElementById('ev-title').value.trim();
+  const date=document.getElementById('ev-date').value;
+  if(!title||!date){alert('What and date are required.');return;}
+  schedItems.push({id:evNextId++,date,time:document.getElementById('ev-time').value,title,jobName:document.getElementById('ev-job').value,notes:document.getElementById('ev-notes').value.trim()});
+  closeModal('event-modal');
+  calSel=date;
+  const d=new Date(date+'T00:00:00');calY=d.getFullYear();calM=d.getMonth();
+  scheduleSave();
+  renderSchedule();
+}
+function deleteSchedEvent(id){
+  if(!confirm('Remove this scheduled item?'))return;
+  schedItems=schedItems.filter(e=>e.id!==id);
+  scheduleSave();
+  renderSchedule();
+}
+
+// ── NEW JOB ──
+function openNewModal(){
+  document.getElementById('nj-date').value=new Date().toISOString().split('T')[0];
+  ['nj-name','nj-notes','nj-ins'].forEach(id=>document.getElementById(id).value='');
+  populateSelects();
+  document.getElementById('new-modal').classList.add('open');
+}
+async function addJob(){
+  const name=document.getElementById('nj-name').value.trim();
+  const date=document.getElementById('nj-date').value;
+  if(!name||!date){alert('Name and start date are required.');return;}
+  const type=document.getElementById('nj-type').value;
+  const crew=document.getElementById('nj-crew').value;
+  const ins=document.getElementById('nj-ins').value.trim();
+  const notes=document.getElementById('nj-notes').value.trim();
+  closeModal('new-modal');
+  showToast('Adding to Job Cost Sheet…');
+  try{
+    const out=await apiPostJson({action:'addJob',name,start:date});
+    if(!out||!out.ok)throw new Error((out&&out.error)||'addJob failed');
+    // Attach type/crew/insurance/notes to the new sheet job
+    jobMeta[out.id]={type,crew,ins};
+    jobTypes[out.id]=type;
+    try{localStorage.setItem('archer_jobTypes',JSON.stringify(jobTypes));}catch(e){}
+    if(notes)jobNotes[out.id]=notes;
+    await saveAll();
+    showToast('Added to Job Cost Sheet ✓');
+    await refreshData();
+  }catch(e){
+    // Offline / script error — keep the job locally so nothing is lost
+    const id=nextId++;
+    localJobs.unshift({id,name,type,crew,q:'',start:date,closed:false,closeDate:'',ins,fromSheet:false});
+    if(notes)jobNotes[id]=notes;
+    scheduleSave();
+    alert('Could not reach the Job Cost Sheet, so this job was saved in the app only. Check your connection — it will need to be added to the cost sheet manually.');
+  }
+  currentFilter='open';
+  document.querySelectorAll('.filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  renderJobs();
+  populateSelects();
+  if(document.getElementById('view-schedule').style.display!=='none')renderSchedule();
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// Load job type overrides from localStorage
+try{jobTypes=JSON.parse(localStorage.getItem('archer_jobTypes'))||{};}catch(e){jobTypes={};}
+
+refreshData();
+setInterval(refreshData,5*60*1000);
+</script>
+</body>
+</html>
