@@ -1094,7 +1094,16 @@ function closeModal(id){document.getElementById(id).classList.remove('open');}
 try{jobTypes=JSON.parse(localStorage.getItem('archer_jobTypes'))||{};}catch(e){jobTypes={};}
 
 refreshData();
-setInterval(refreshData,5*60*1000);
+// Auto-sync every 60 seconds
+setInterval(refreshData,60*1000);
+// Sync instantly when the app is reopened or brought back to the foreground
+let lastFocusSync=Date.now();
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible' && Date.now()-lastFocusSync>8000){
+    lastFocusSync=Date.now();
+    refreshData();
+  }
+});
 </script>
 </body>
 </html>
