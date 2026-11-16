@@ -225,8 +225,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="job-tabs">
       <div class="job-tab active" onclick="switchJobTab('overview',this)">Overview</div>
       <div class="job-tab" onclick="switchJobTab('contact',this)">Contact</div>
-      <div class="job-tab" onclick="switchJobTab('checklist',this)">Checklist</div>
-      <div class="job-tab" onclick="switchJobTab('repairs',this)">Repairs</div>
+      <div class="job-tab" onclick="switchJobTab('tasks',this)">Tasks</div>
       <div class="job-tab" onclick="switchJobTab('photos',this)">Photos</div>
       <div class="job-tab" onclick="switchJobTab('notes',this)">Notes</div>
       <div class="job-tab" onclick="switchJobTab('estimates',this)">Estimates</div>
@@ -434,8 +433,21 @@ function loadCache(){
     jobContacts=c.jobContacts||{}; jobMeta=c.jobMeta||{}; jobTypes=c.jobTypes||jobTypes||{}; jobFolders=c.jobFolders||{};
     employees=c.employees||[]; timeEntries=c.timeEntries||[]; schedItems=c.schedItems||[]; templates=c.templates||[]; roomTemplates=c.roomTemplates||[]; jobRepairs=c.jobRepairs||{};
     nextId=c.nextId||nextId; empNextId=c.empNextId||empNextId; tcNextId=c.tcNextId||tcNextId; evNextId=c.evNextId||evNextId;
+    mergeChecklistsIntoTasks();
     return (sheetJobs.length>0 || localJobs.length>0);
   }catch(e){return false;}
+}
+
+// Fold any legacy checklist items into the unified Tasks model, under a "General" section
+function mergeChecklistsIntoTasks(){
+  Object.keys(jobChecklists||{}).forEach(function(jid){
+    if(!jobRepairs[jid])jobRepairs[jid]=[];
+    jobChecklists[jid].forEach(function(c,i){
+      if(!jobRepairs[jid].some(function(t){return t.id===c.id;}))
+        jobRepairs[jid].push({room:'General',id:c.id,task:c.text,done:!!c.done,date:c.date||'',order:1000+i,sub:false});
+    });
+  });
+  jobChecklists={};
 }
 
 async function refreshData(){
@@ -484,6 +496,7 @@ async function refreshData(){
       roomTemplates=(data.RoomTemplates||[]).map(r=>({category:(r[0]||'').toString().trim(),type:(r[1]||'').toString().trim(),task:(r[2]||'').toString().trim(),order:parseInt(r[3])||0,sub:(r[4]===true||(r[4]||'').toString().trim().toUpperCase()==='TRUE'||(r[4]||'').toString().trim().toLowerCase()==='x')})).filter(t=>t.category&&t.type&&t.task);
       // Per-job repair tasks (Repairs tab: jobId,room,id,task,done,date,order)
       jobRepairs={};(data.Repairs||[]).forEach(r=>{if(!r[0])return;const jid=r[0];if(!jobRepairs[jid])jobRepairs[jid]=[];jobRepairs[jid].push({room:(r[1]||'').toString().trim(),id:parseInt(r[2])||Date.now(),task:(r[3]||'').toString().trim(),done:r[4]==='TRUE'||r[4]===true||r[4]==='true',date:r[5]||'',order:parseInt(r[6])||0,sub:(r[7]===true||(r[7]||'').toString().trim().toUpperCase()==='TRUE'||(r[7]||'').toString().trim().toLowerCase()==='true')});});
+      mergeChecklistsIntoTasks();
       var _allRep=[];Object.values(jobRepairs).forEach(a=>a.forEach(t=>_allRep.push(t.id)));
       repairNextId=_allRep.length>0?Math.max.apply(null,_allRep)+1:1;
     }
@@ -629,8 +642,8 @@ function renderJobs(){
     const days=j.closed&&j.closeDate&&j.start?daysBetween(j.start,j.closeDate):j.start?daysOpen(j.start):null;
     const hot=!j.closed&&days!==null&&days>14;
     const badge=j.closed&&j.closeDate&&j.start?days+'d job':j.closed?'Closed':days!==null?'Day '+days:'—';
-    const cc=(jobChecklists[j.id]||[]).length;
-    const dc=(jobChecklists[j.id]||[]).filter(c=>c.done).length;
+    const cc=(jobRepairs[j.id]||[]).length;
+    const dc=(jobRepairs[j.id]||[]).filter(t=>t.done).length;
     const hn=jobNotes[j.id]&&jobNotes[j.id].trim()!=='';
     const urg=isUrgent(j);
     return`<div class="job-card" onclick="openJobSheet(${j.id})" style="${urg&&!j.closed?'border-color:var(--red-border);border-left:3px solid var(--red)':''}">
@@ -674,7 +687,7 @@ function switchJobTab(tab,el){
   el.classList.add('active');
   if(tab==='photos')renderPhotosTab(activeJob);
   else if(tab==='contact')renderContactTab(activeJob);
-  else if(tab==='repairs')renderRepairsTab(activeJob);
+  else if(tab==='repairs'||tab==='tasks'||tab==='checklist')renderRepairsTab(activeJob);
   else renderJobTab(tab);
 }
 
@@ -893,20 +906,20 @@ function typesInCategory(cat){return [...new Set(roomTemplates.filter(t=>t.categ
 function renderRepairsTab(j){
   if(!jobRepairs[j.id])jobRepairs[j.id]=[];
   const tasks=jobRepairs[j.id];
-  const rooms=[...new Set(tasks.map(t=>t.room))];
+  // "General" is always shown first — a home for checklist items and one-off scheduled tasks
+  let rooms=[...new Set(tasks.map(t=>t.room))];
+  rooms=['General',...rooms.filter(r=>r!=='General')];
   const totalDone=tasks.filter(t=>t.done).length;
   const body=document.getElementById('tab-body');
   let html=`<div class="ssec">
-    <div class="ssec-title" style="display:flex;justify-content:space-between">Repairs <span>${totalDone}/${tasks.length} done</span></div>`;
-  if(rooms.length===0){
-    html+=`<div style="color:var(--text3);font-size:13px;padding:10px 0 16px">No sections added yet. Tap <strong>Add Section</strong> to pull in its standard repair tasks.</div>`;
-  }
+    <div class="ssec-title" style="display:flex;justify-content:space-between">Tasks <span>${totalDone}/${tasks.length} done</span></div>`;
   rooms.forEach(room=>{
     const rt=tasks.filter(t=>t.room===room).sort((a,b)=>a.order-b.order);
     const rd=rt.filter(t=>t.done).length;
+    const cap=room==='General'?'<div style="font-size:11px;color:var(--text3);margin-top:1px;font-weight:400">Checklist & one-off scheduled items</div>':'';
     html+=`<div style="border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:12px 13px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <div style="font-size:14px;font-weight:700">${room}</div>
+        <div><div style="font-size:14px;font-weight:700">${room}</div>${cap}</div>
         <div style="font-size:11px;color:var(--text2)">${rd}/${rt.length}</div>
       </div>
       ${rt.map(t=>{const needs=t.sub&&!t.done&&!t.date;return `<div class="check-item" style="padding:9px 0;${needs?'background:var(--amber-bg);border-radius:8px;margin:2px -6px;padding:9px 6px':''}">
@@ -916,6 +929,7 @@ function renderRepairsTab(j){
           ${needs?'<div style="font-size:11px;color:var(--amber);font-weight:600;margin-top:2px"><i class="ti ti-alert-triangle" style="font-size:12px;vertical-align:-1px"></i> Needs scheduling — set a date</div>':''}
           <input type="date" value="${t.date||''}" onchange="setRepairDateVal(${t.id},this.value)" style="font-size:11px;margin-top:3px;padding:3px 6px;border-radius:6px;border:0.5px solid ${needs?'var(--amber)':'var(--border2)'};background:var(--bg2);color:${t.date?'var(--blue)':'var(--text3)'};font-family:inherit;-webkit-appearance:none;appearance:none">
         </div>
+        <span title="${t.sub?'Scheduling flag on — tap to clear':'Flag as needs scheduling'}" style="font-size:17px;color:${t.sub?'var(--amber)':'var(--text3)'};cursor:pointer;padding:3px" onclick="toggleRepairSub(${t.id})"><i class="ti ti-calendar-${t.sub?'exclamation':'plus'}"></i></span>
         <span style="font-size:17px;color:var(--text3);cursor:pointer;padding:3px" onclick="deleteRepair(${t.id})"><i class="ti ti-x"></i></span>
       </div>`}).join('')}
       <div class="check-input-row" style="margin-top:8px">
@@ -925,6 +939,7 @@ function renderRepairsTab(j){
     </div>`;
   });
   html+=`<button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px" onclick="openAddRoom()"><i class="ti ti-plus"></i>Add Section</button>
+    <div style="font-size:11px;color:var(--text3);text-align:center;margin-top:8px">Add a quick task above for a one-off scheduled item, or a section for a room's standard repairs.</div>
     ${roomTemplates.length===0?`<div class="info-box" style="margin-top:12px"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> Add a <strong>RoomTemplates</strong> tab to your sheet (room, task, order) so rooms auto-fill their repair tasks.</div>`:''}
   </div>`;
   body.innerHTML=html;
@@ -970,7 +985,13 @@ function toggleRepair(id){
 }
 function deleteRepair(id){
   jobRepairs[activeJob.id]=jobRepairs[activeJob.id].filter(x=>x.id!==id);
-  scheduleSave();renderRepairsTab(activeJob);
+  scheduleSave();renderRepairsTab(activeJob);renderJobs();
+}
+// Flag / unflag a task as sub work that needs scheduling (drives the SCHEDULE badge + banner)
+function toggleRepairSub(id){
+  const t=jobRepairs[activeJob.id].find(x=>x.id===id);if(!t)return;
+  t.sub=!t.sub;
+  scheduleSave();renderRepairsTab(activeJob);renderJobs();
 }
 function addRepairTask(room){
   const inp=document.getElementById('rep-new-'+room.replace(/[^a-zA-Z0-9]/g,''));
@@ -1026,7 +1047,7 @@ function schedSetDate(jobId,id,val){
 function openJobRepairs(jobId){
   closeModal('sched-board-modal');
   openJobSheet(jobId);
-  document.querySelectorAll('.job-tab').forEach((t,i)=>t.classList.toggle('active',i===3));
+  document.querySelectorAll('.job-tab').forEach((t,i)=>t.classList.toggle('active',i===2));
   if(activeJob)renderRepairsTab(activeJob);
 }
 
