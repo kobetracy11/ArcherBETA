@@ -326,17 +326,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="modal-overlay" id="add-room-modal" onclick="if(event.target===this)closeModal('add-room-modal')">
   <div class="modal">
     <div class="modal-handle"></div>
-    <div class="modal-header"><span class="modal-title">Add Room</span><span style="font-size:24px;color:var(--text3);cursor:pointer" onclick="closeModal('add-room-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="modal-header"><span class="modal-title">Add Section</span><span style="font-size:24px;color:var(--text3);cursor:pointer" onclick="closeModal('add-room-modal')"><i class="ti ti-x"></i></span></div>
     <div class="modal-body">
-      <div class="info-box"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> The room's standard repair tasks fill in automatically. You can add or remove tasks after.</div>
-      <div class="field"><label>Room</label>
-        <select id="ar-room" onchange="document.getElementById('ar-custom-wrap').style.display=this.value==='__custom'?'block':'none'"></select>
+      <div class="info-box"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> Pick a category and type — its standard repair tasks fill in automatically. You can add or remove tasks after.</div>
+      <div class="field"><label>Category</label>
+        <select id="ar-cat" onchange="arCatChange()"></select>
       </div>
-      <div class="field" id="ar-custom-wrap" style="display:none"><label>Custom room name</label><input id="ar-custom" placeholder="e.g. Mud Room" autocomplete="off"></div>
+      <div class="field"><label>Type</label>
+        <select id="ar-type"></select>
+      </div>
+      <div class="field" id="ar-custom-wrap" style="display:none"><label>Custom name</label><input id="ar-custom" placeholder="e.g. Mud Room" autocomplete="off"></div>
     </div>
     <div class="modal-footer">
       <button class="btn" onclick="closeModal('add-room-modal')">Cancel</button>
-      <button class="btn btn-primary" onclick="addRoomConfirm()"><i class="ti ti-check"></i>Add Room</button>
+      <button class="btn btn-primary" onclick="addRoomConfirm()"><i class="ti ti-check"></i>Add Section</button>
     </div>
   </div>
 </div>
@@ -460,7 +463,7 @@ async function refreshData(){
       // Quick-schedule templates (editable in the Templates tab of the sheet)
       templates=(data.Templates||[]).map(r=>({category:(r[0]||'').toString().trim(),task:(r[1]||'').toString().trim(),offset:parseInt(r[2])||0,anchor:(r[3]||'today').toString().trim().toLowerCase()})).filter(t=>t.category&&t.task);
       // Room repair templates (master, editable in RoomTemplates tab)
-      roomTemplates=(data.RoomTemplates||[]).map(r=>({room:(r[0]||'').toString().trim(),task:(r[1]||'').toString().trim(),order:parseInt(r[2])||0})).filter(t=>t.room&&t.task);
+      roomTemplates=(data.RoomTemplates||[]).map(r=>({category:(r[0]||'').toString().trim(),type:(r[1]||'').toString().trim(),task:(r[2]||'').toString().trim(),order:parseInt(r[3])||0})).filter(t=>t.category&&t.type&&t.task);
       // Per-job repair tasks (Repairs tab: jobId,room,id,task,done,date,order)
       jobRepairs={};(data.Repairs||[]).forEach(r=>{if(!r[0])return;const jid=r[0];if(!jobRepairs[jid])jobRepairs[jid]=[];jobRepairs[jid].push({room:(r[1]||'').toString().trim(),id:parseInt(r[2])||Date.now(),task:(r[3]||'').toString().trim(),done:r[4]==='TRUE'||r[4]===true||r[4]==='true',date:r[5]||'',order:parseInt(r[6])||0});});
       var _allRep=[];Object.values(jobRepairs).forEach(a=>a.forEach(t=>_allRep.push(t.id)));
@@ -846,7 +849,8 @@ async function syncAllFolders(btn){
 }
 
 // ── REPAIRS (room-based repair plan) ──
-function roomList(){return [...new Set(roomTemplates.map(t=>t.room))];}
+function repairCategories(){return [...new Set(roomTemplates.map(t=>t.category))];}
+function typesInCategory(cat){return [...new Set(roomTemplates.filter(t=>t.category===cat).map(t=>t.type))];}
 function renderRepairsTab(j){
   if(!jobRepairs[j.id])jobRepairs[j.id]=[];
   const tasks=jobRepairs[j.id];
@@ -856,7 +860,7 @@ function renderRepairsTab(j){
   let html=`<div class="ssec">
     <div class="ssec-title" style="display:flex;justify-content:space-between">Repairs <span>${totalDone}/${tasks.length} done</span></div>`;
   if(rooms.length===0){
-    html+=`<div style="color:var(--text3);font-size:13px;padding:10px 0 16px">No rooms added yet. Tap <strong>Add Room</strong> to pull in its standard repair tasks.</div>`;
+    html+=`<div style="color:var(--text3);font-size:13px;padding:10px 0 16px">No sections added yet. Tap <strong>Add Section</strong> to pull in its standard repair tasks.</div>`;
   }
   rooms.forEach(room=>{
     const rt=tasks.filter(t=>t.room===room).sort((a,b)=>a.order-b.order);
@@ -880,34 +884,41 @@ function renderRepairsTab(j){
       </div>
     </div>`;
   });
-  html+=`<button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px" onclick="openAddRoom()"><i class="ti ti-plus"></i>Add Room</button>
+  html+=`<button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px" onclick="openAddRoom()"><i class="ti ti-plus"></i>Add Section</button>
     ${roomTemplates.length===0?`<div class="info-box" style="margin-top:12px"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> Add a <strong>RoomTemplates</strong> tab to your sheet (room, task, order) so rooms auto-fill their repair tasks.</div>`:''}
   </div>`;
   body.innerHTML=html;
 }
 
 function openAddRoom(){
-  const rooms=roomList();
-  const sel=document.getElementById('ar-room');
-  sel.innerHTML=rooms.map(r=>`<option>${r}</option>`).join('')+'<option value="__custom">Other (type below)…</option>';
+  const cats=repairCategories();
+  const catSel=document.getElementById('ar-cat');
+  catSel.innerHTML=cats.length?cats.map(c=>`<option>${c}</option>`).join(''):'<option value="">(set up RoomTemplates)</option>';
+  arCatChange();
   document.getElementById('ar-custom').value='';
-  document.getElementById('ar-custom-wrap').style.display=rooms.length?'none':'block';
   document.getElementById('add-room-modal').classList.add('open');
+}
+function arCatChange(){
+  const cat=document.getElementById('ar-cat').value;
+  const types=typesInCategory(cat);
+  const typeSel=document.getElementById('ar-type');
+  typeSel.innerHTML=types.map(t=>`<option>${t}</option>`).join('')+'<option value="__custom">Other (type below)…</option>';
+  typeSel.onchange=function(){document.getElementById('ar-custom-wrap').style.display=this.value==='__custom'?'block':'none';};
+  document.getElementById('ar-custom-wrap').style.display='none';
 }
 function addRoomConfirm(){
   if(!activeJob)return;
-  let room=document.getElementById('ar-room').value;
-  if(room==='__custom'||!room)room=document.getElementById('ar-custom').value.trim();
-  if(!room){alert('Pick or type a room.');return;}
+  const cat=document.getElementById('ar-cat').value;
+  let type=document.getElementById('ar-type').value;
+  if(type==='__custom'||!type)type=document.getElementById('ar-custom').value.trim();
+  if(!type){alert('Pick or type a section.');return;}
   if(!jobRepairs[activeJob.id])jobRepairs[activeJob.id]=[];
-  // Don't duplicate a room already on the job
-  if(jobRepairs[activeJob.id].some(t=>t.room===room)){closeModal('add-room-modal');showToast(room+' already added');return;}
-  const steps=roomTemplates.filter(t=>t.room===room).sort((a,b)=>a.order-b.order);
+  if(jobRepairs[activeJob.id].some(t=>t.room===type)){closeModal('add-room-modal');showToast(type+' already added');return;}
+  const steps=roomTemplates.filter(t=>t.category===cat&&t.type===type).sort((a,b)=>a.order-b.order);
   if(steps.length){
-    steps.forEach(s=>jobRepairs[activeJob.id].push({id:repairNextId++,room,task:s.task,done:false,date:'',order:s.order}));
+    steps.forEach(s=>jobRepairs[activeJob.id].push({id:repairNextId++,room:type,task:s.task,done:false,date:'',order:s.order}));
   }else{
-    // custom room with no template — start with one blank line prompt
-    jobRepairs[activeJob.id].push({id:repairNextId++,room,task:'New task',done:false,date:'',order:1});
+    jobRepairs[activeJob.id].push({id:repairNextId++,room:type,task:'New task',done:false,date:'',order:1});
   }
   closeModal('add-room-modal');
   scheduleSave();
