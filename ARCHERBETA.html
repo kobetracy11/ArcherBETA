@@ -324,7 +324,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 <div class="saving-toast" id="saving-toast">Saving…</div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxzO1ttpZrgD_c7aVuDgG10xpPrxu90a7Md1DCOii94qFwPDmjkH_IN2n5pPLBvya-/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxHSXxndxt2qUlU1vCw4GbxaszHKZsf9tvaPvZEx-ArRiQjq_qdu4Rs7XiR2Ne1Wia0/exec';
 const DRIVE  = 'https://drive.google.com/drive/u/0/folders/1ZAtp4mCnBoc8yV6KUVkbitL0RAWI0Dyl';
 const PHOTOS = 'https://drive.google.com/drive/u/0/folders/1kFpeUpQHp_sjDSkk2ueWw7nCTnNKdCpS';
 const TODAY  = new Date(); TODAY.setHours(0,0,0,0);
@@ -335,7 +335,7 @@ const typeLabel = {water:'Water Damage',fire:'Fire Damage',mold:'Mold Remediatio
 
 // ── STATE ──
 let sheetJobs=[], localJobs=[], currentFilter='open', activeJob=null;
-let jobNotes={}, jobChecklists={}, jobEstimates={}, jobContacts={}, jobTypes={}, jobMeta={};
+let jobNotes={}, jobChecklists={}, jobEstimates={}, jobContacts={}, jobTypes={}, jobMeta={}, jobFolders={};
 let schedItems=[], evNextId=1;
 let calY=new Date().getFullYear(), calM=new Date().getMonth(), calSel=null;
 let employees=[], timeEntries=[];
@@ -374,7 +374,7 @@ async function apiPostJson(payload){
 function saveCache(){
   try{
     localStorage.setItem('archer_cache', JSON.stringify({
-      sheetJobs, localJobs, jobNotes, jobChecklists, jobEstimates, jobContacts, jobMeta, jobTypes,
+      sheetJobs, localJobs, jobNotes, jobChecklists, jobEstimates, jobContacts, jobMeta, jobTypes, jobFolders,
       employees, timeEntries, schedItems,
       nextId, empNextId, tcNextId, evNextId, ts: Date.now()
     }));
@@ -386,7 +386,7 @@ function loadCache(){
     if(!c)return false;
     sheetJobs=c.sheetJobs||[]; localJobs=c.localJobs||[];
     jobNotes=c.jobNotes||{}; jobChecklists=c.jobChecklists||{}; jobEstimates=c.jobEstimates||{};
-    jobContacts=c.jobContacts||{}; jobMeta=c.jobMeta||{}; jobTypes=c.jobTypes||jobTypes||{};
+    jobContacts=c.jobContacts||{}; jobMeta=c.jobMeta||{}; jobTypes=c.jobTypes||jobTypes||{}; jobFolders=c.jobFolders||{};
     employees=c.employees||[]; timeEntries=c.timeEntries||[]; schedItems=c.schedItems||[];
     nextId=c.nextId||nextId; empNextId=c.empNextId||empNextId; tcNextId=c.tcNextId||tcNextId; evNextId=c.evNextId||evNextId;
     return (sheetJobs.length>0 || localJobs.length>0);
@@ -427,6 +427,8 @@ async function refreshData(){
       nextId=localJobs.length>0?Math.max(...localJobs.map(j=>j.id))+1:10000;
       // Job meta (type/crew/insurance for sheet jobs — syncs across devices)
       jobMeta={};(data.JobMeta||[]).forEach(r=>{if(r[0])jobMeta[r[0]]={type:r[1]||'',crew:r[2]||'',ins:r[3]||'',priority:r[4]||''};});
+      // Photo folder links keyed by job name (synced from Drive)
+      jobFolders={};(data.Folders||[]).forEach(r=>{if(r[0])jobFolders[r[0].toString().trim()]=r[1]||'';});
       sheetJobs.forEach(j=>{const m=jobMeta[j.id];if(!m)return;if(m.type&&!jobTypes[j.id])j.type=m.type;if(m.crew)j.crew=m.crew;if(m.ins)j.ins=m.ins;if(m.priority)j.priority=m.priority;});
       // Scheduled items
       schedItems=(data.Schedule||[]).map(r=>({id:parseInt(r[0])||Date.now(),date:r[1]||'',time:r[2]||'',title:r[3]||'',jobName:r[4]||'',notes:r[5]||''})).filter(e=>e.date&&e.title);
@@ -747,22 +749,54 @@ function renderContactTab(j){
     <div style="font-size:11px;color:var(--text3);text-align:right">Syncs to shared sheet automatically</div>`;
 }
 
+function photoFolderButtons(name,url){
+  return `<a href="${url}" target="_blank" class="btn btn-green" style="width:100%;justify-content:center;padding:14px;font-size:15px"><i class="ti ti-folder-open"></i> Open ${name} Photos</a>
+    <a href="${PHOTOS}" target="_blank" class="btn" style="width:100%;justify-content:center;padding:10px;font-size:12px;margin-top:8px;color:var(--text2)"><i class="ti ti-brand-google-drive"></i> All job photos</a>`;
+}
 function renderPhotosTab(j){
   const body=document.getElementById('tab-body');
+  const known=jobFolders[j.name]; // direct link from synced data (instant)
   body.innerHTML=`
     <div class="ssec">
       <div class="ssec-title">Job Photos</div>
-      <div class="info-box"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> Upload photos to the <strong>${j.name}</strong> folder in your ARCHER Job Photos Drive folder.</div>
-      <a href="${PHOTOS}" target="_blank" class="btn btn-green" style="width:100%;justify-content:center;padding:13px;font-size:14px;margin-bottom:12px">
-        <i class="ti ti-brand-google-drive"></i> Open ARCHER Job Photos Folder
-      </a>
-      <div style="background:var(--bg2);border-radius:var(--radius);padding:12px;font-size:13px;color:var(--text2);line-height:1.8">
-        1. Tap <strong>Open ARCHER Job Photos Folder</strong><br>
-        2. Open or create folder named <strong>${j.name}</strong><br>
-        3. Tap <strong>+</strong> → <strong>Upload</strong><br>
-        4. Select photos from your camera roll
+      <div id="photo-folder-area">
+        ${known
+          ? photoFolderButtons(j.name, known)
+          : `<div class="info-box"><i class="ti ti-loader" style="font-size:14px;vertical-align:-2px"></i> Preparing <strong>${j.name}</strong>'s photo folder…</div>
+             <a href="${PHOTOS}" target="_blank" class="btn" style="width:100%;justify-content:center;padding:12px;font-size:13px"><i class="ti ti-brand-google-drive"></i> Open all job photos</a>`}
       </div>
+      <div style="background:var(--bg2);border-radius:var(--radius);padding:12px;font-size:13px;color:var(--text2);line-height:1.8;margin-top:12px">
+        1. Tap <strong>Open ${j.name} Photos</strong> above<br>
+        2. Tap <strong>+</strong> → <strong>Upload</strong> in Google Drive<br>
+        3. Select photos from your camera roll
+      </div>
+      <button class="btn" style="width:100%;justify-content:center;margin-top:14px;padding:10px;font-size:12px;color:var(--text2)" onclick="syncAllFolders(this)"><i class="ti ti-folders"></i> Create folders for all jobs</button>
     </div>`;
+  ensureJobFolder(j.name); // confirm/create in background and refresh the link
+}
+
+// Get-or-create THIS job's Drive folder, then show a direct link
+async function ensureJobFolder(name){
+  try{
+    const out=await apiPostJson({action:'ensureFolder',name});
+    if(out && out.ok && out.url){
+      jobFolders[name]=out.url;
+      saveCache();
+      const area=document.getElementById('photo-folder-area');
+      if(area && activeJob && activeJob.name===name) area.innerHTML=photoFolderButtons(name, out.url);
+    }
+  }catch(e){/* keep whatever link is already shown */}
+}
+
+// Create a Drive folder for every job in one shot
+async function syncAllFolders(btn){
+  if(btn){btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Creating folders…';}
+  try{
+    const names=getAllJobs().map(j=>j.name);
+    const out=await apiPostJson({action:'syncFolders',names});
+    showToast(out&&out.ok?('Folders ready — '+out.created+' new ✓'):'Could not create folders');
+  }catch(e){showToast('Could not reach Drive');}
+  if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-folders"></i> Create folders for all jobs';}
 }
 
 // ── DATA MUTATIONS ──
