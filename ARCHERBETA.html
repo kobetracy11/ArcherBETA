@@ -225,10 +225,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="job-tabs">
       <div class="job-tab active" onclick="switchJobTab('overview',this)">Overview</div>
       <div class="job-tab" onclick="switchJobTab('contact',this)">Contact</div>
-      <div class="job-tab" onclick="switchJobTab('notes',this)">Notes</div>
       <div class="job-tab" onclick="switchJobTab('checklist',this)">Checklist</div>
-      <div class="job-tab" onclick="switchJobTab('estimates',this)">Estimates</div>
+      <div class="job-tab" onclick="switchJobTab('repairs',this)">Repairs</div>
       <div class="job-tab" onclick="switchJobTab('photos',this)">Photos</div>
+      <div class="job-tab" onclick="switchJobTab('notes',this)">Notes</div>
+      <div class="job-tab" onclick="switchJobTab('estimates',this)">Estimates</div>
     </div>
     <div class="tab-body" id="tab-body"></div>
   </div>
@@ -321,6 +322,25 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
   </div>
 </div>
 
+<!-- Add Room Modal -->
+<div class="modal-overlay" id="add-room-modal" onclick="if(event.target===this)closeModal('add-room-modal')">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-header"><span class="modal-title">Add Room</span><span style="font-size:24px;color:var(--text3);cursor:pointer" onclick="closeModal('add-room-modal')"><i class="ti ti-x"></i></span></div>
+    <div class="modal-body">
+      <div class="info-box"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> The room's standard repair tasks fill in automatically. You can add or remove tasks after.</div>
+      <div class="field"><label>Room</label>
+        <select id="ar-room" onchange="document.getElementById('ar-custom-wrap').style.display=this.value==='__custom'?'block':'none'"></select>
+      </div>
+      <div class="field" id="ar-custom-wrap" style="display:none"><label>Custom room name</label><input id="ar-custom" placeholder="e.g. Mud Room" autocomplete="off"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" onclick="closeModal('add-room-modal')">Cancel</button>
+      <button class="btn btn-primary" onclick="addRoomConfirm()"><i class="ti ti-check"></i>Add Room</button>
+    </div>
+  </div>
+</div>
+
 <div class="saving-toast" id="saving-toast">Saving…</div>
 
 <script>
@@ -337,6 +357,10 @@ const typeLabel = {water:'Water Damage',fire:'Fire Damage',mold:'Mold Remediatio
 let sheetJobs=[], localJobs=[], currentFilter='open', activeJob=null;
 let jobNotes={}, jobChecklists={}, jobEstimates={}, jobContacts={}, jobTypes={}, jobMeta={}, jobFolders={};
 let schedItems=[], evNextId=1;
+let templates=[]; // [{category, task, offset, anchor}]
+let roomTemplates=[]; // [{room, task, order}] — master repair tasks per room
+let jobRepairs={};    // jobId -> [{id, room, task, done, date, order}]
+let repairNextId=1;
 let calY=new Date().getFullYear(), calM=new Date().getMonth(), calSel=null;
 let employees=[], timeEntries=[];
 let nextId=10000, empNextId=1, tcNextId=1;
@@ -375,7 +399,7 @@ function saveCache(){
   try{
     localStorage.setItem('archer_cache', JSON.stringify({
       sheetJobs, localJobs, jobNotes, jobChecklists, jobEstimates, jobContacts, jobMeta, jobTypes, jobFolders,
-      employees, timeEntries, schedItems,
+      employees, timeEntries, schedItems, templates, roomTemplates, jobRepairs,
       nextId, empNextId, tcNextId, evNextId, ts: Date.now()
     }));
   }catch(e){}
@@ -387,7 +411,7 @@ function loadCache(){
     sheetJobs=c.sheetJobs||[]; localJobs=c.localJobs||[];
     jobNotes=c.jobNotes||{}; jobChecklists=c.jobChecklists||{}; jobEstimates=c.jobEstimates||{};
     jobContacts=c.jobContacts||{}; jobMeta=c.jobMeta||{}; jobTypes=c.jobTypes||jobTypes||{}; jobFolders=c.jobFolders||{};
-    employees=c.employees||[]; timeEntries=c.timeEntries||[]; schedItems=c.schedItems||[];
+    employees=c.employees||[]; timeEntries=c.timeEntries||[]; schedItems=c.schedItems||[]; templates=c.templates||[]; roomTemplates=c.roomTemplates||[]; jobRepairs=c.jobRepairs||{};
     nextId=c.nextId||nextId; empNextId=c.empNextId||empNextId; tcNextId=c.tcNextId||tcNextId; evNextId=c.evNextId||evNextId;
     return (sheetJobs.length>0 || localJobs.length>0);
   }catch(e){return false;}
@@ -433,6 +457,14 @@ async function refreshData(){
       // Scheduled items
       schedItems=(data.Schedule||[]).map(r=>({id:parseInt(r[0])||Date.now(),date:r[1]||'',time:r[2]||'',title:r[3]||'',jobName:r[4]||'',notes:r[5]||''})).filter(e=>e.date&&e.title);
       evNextId=schedItems.length>0?Math.max(...schedItems.map(e=>e.id))+1:1;
+      // Quick-schedule templates (editable in the Templates tab of the sheet)
+      templates=(data.Templates||[]).map(r=>({category:(r[0]||'').toString().trim(),task:(r[1]||'').toString().trim(),offset:parseInt(r[2])||0,anchor:(r[3]||'today').toString().trim().toLowerCase()})).filter(t=>t.category&&t.task);
+      // Room repair templates (master, editable in RoomTemplates tab)
+      roomTemplates=(data.RoomTemplates||[]).map(r=>({room:(r[0]||'').toString().trim(),task:(r[1]||'').toString().trim(),order:parseInt(r[2])||0})).filter(t=>t.room&&t.task);
+      // Per-job repair tasks (Repairs tab: jobId,room,id,task,done,date,order)
+      jobRepairs={};(data.Repairs||[]).forEach(r=>{if(!r[0])return;const jid=r[0];if(!jobRepairs[jid])jobRepairs[jid]=[];jobRepairs[jid].push({room:(r[1]||'').toString().trim(),id:parseInt(r[2])||Date.now(),task:(r[3]||'').toString().trim(),done:r[4]==='TRUE'||r[4]===true||r[4]==='true',date:r[5]||'',order:parseInt(r[6])||0});});
+      var _allRep=[];Object.values(jobRepairs).forEach(a=>a.forEach(t=>_allRep.push(t.id)));
+      repairNextId=_allRep.length>0?Math.max.apply(null,_allRep)+1:1;
     }
     lastSync=new Date();
     setSyncBadge('live');
@@ -486,6 +518,10 @@ async function saveAll(){
     // Scheduled items
     const schedData=[['id','date','time','title','jobName','notes'],...schedItems.map(e=>[e.id,e.date,e.time,e.title,e.jobName,e.notes])];
     await apiPost('Schedule',schedData);
+    // Repairs (room-based repair tasks per job)
+    const repData=[['jobId','room','id','task','done','date','order']];
+    Object.entries(jobRepairs).forEach(([jid,arr])=>arr.forEach(t=>repData.push([jid,t.room,t.id,t.task,t.done,t.date||'',t.order||0])));
+    await apiPost('Repairs',repData);
     showToast('Saved ✓');
   }catch(e){showToast('Save failed — check connection');}
 }
@@ -596,6 +632,7 @@ function switchJobTab(tab,el){
   el.classList.add('active');
   if(tab==='photos')renderPhotosTab(activeJob);
   else if(tab==='contact')renderContactTab(activeJob);
+  else if(tab==='repairs')renderRepairsTab(activeJob);
   else renderJobTab(tab);
 }
 
@@ -652,6 +689,15 @@ function renderJobTab(tab){
         ${(jobContacts[j.id]&&jobContacts[j.id].address&&jobContacts[j.id].address.trim())?`<div class="srow"><span class="srow-label">Address</span><a href="https://maps.google.com?q=${encodeURIComponent(jobContacts[j.id].address)}" target="_blank" style="color:var(--blue);text-decoration:none;font-weight:600;font-size:13px;text-align:right;max-width:62%;display:inline-flex;align-items:center;gap:4px;justify-content:flex-end">${jobContacts[j.id].address.replace(/\n/g,', ')}<i class="ti ti-map-pin" style="font-size:14px;flex-shrink:0"></i></a></div>`:''}
       </div>
       ${(jobContacts[j.id]&&jobContacts[j.id].address&&jobContacts[j.id].address.trim())?`<div class="ssec"><a href="https://maps.google.com?q=${encodeURIComponent(jobContacts[j.id].address)}" target="_blank" class="btn btn-green" style="width:100%;justify-content:center;padding:13px;font-size:14px"><i class="ti ti-navigation"></i>Navigate to Job</a></div>`:''}
+      <div class="ssec">
+        <div class="ssec-title">Quick Schedule</div>
+        ${templates.length?`
+          <div style="display:flex;flex-wrap:wrap;gap:8px">
+            ${[...new Set(templates.map(t=>t.category))].map(cat=>`<button class="btn" style="padding:9px 13px;font-size:13px" onclick="applyTemplate(${JSON.stringify(cat)})"><i class="ti ti-calendar-plus"></i>${cat}</button>`).join('')}
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:8px">Tap a category to add its standard tasks to the schedule.</div>`
+        :`<div class="info-box"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> Add a <strong>Templates</strong> tab to your sheet (category, task, offset, anchor) to enable one-tap scheduling.</div>`}
+      </div>
       ${!j.fromSheet?`<div class="ssec">
         <div class="info-box" style="background:var(--amber-bg);color:var(--amber)"><i class="ti ti-alert-triangle" style="font-size:14px;vertical-align:-2px"></i> This job only exists in the app — it's not in the Job Cost Sheet yet.</div>
         <button class="btn btn-primary" onclick="pushLocalJob()" style="width:100%;justify-content:center;padding:12px"><i class="ti ti-table-plus"></i>Add to Job Cost Sheet</button>
@@ -797,6 +843,96 @@ async function syncAllFolders(btn){
     showToast(out&&out.ok?('Folders ready — '+out.created+' new ✓'):'Could not create folders');
   }catch(e){showToast('Could not reach Drive');}
   if(btn){btn.disabled=false;btn.innerHTML='<i class="ti ti-folders"></i> Create folders for all jobs';}
+}
+
+// ── REPAIRS (room-based repair plan) ──
+function roomList(){return [...new Set(roomTemplates.map(t=>t.room))];}
+function renderRepairsTab(j){
+  if(!jobRepairs[j.id])jobRepairs[j.id]=[];
+  const tasks=jobRepairs[j.id];
+  const rooms=[...new Set(tasks.map(t=>t.room))];
+  const totalDone=tasks.filter(t=>t.done).length;
+  const body=document.getElementById('tab-body');
+  let html=`<div class="ssec">
+    <div class="ssec-title" style="display:flex;justify-content:space-between">Repairs <span>${totalDone}/${tasks.length} done</span></div>`;
+  if(rooms.length===0){
+    html+=`<div style="color:var(--text3);font-size:13px;padding:10px 0 16px">No rooms added yet. Tap <strong>Add Room</strong> to pull in its standard repair tasks.</div>`;
+  }
+  rooms.forEach(room=>{
+    const rt=tasks.filter(t=>t.room===room).sort((a,b)=>a.order-b.order);
+    const rd=rt.filter(t=>t.done).length;
+    html+=`<div style="border:0.5px solid var(--border);border-radius:var(--radius-lg);padding:12px 13px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <div style="font-size:14px;font-weight:700">${room}</div>
+        <div style="font-size:11px;color:var(--text2)">${rd}/${rt.length}</div>
+      </div>
+      ${rt.map(t=>`<div class="check-item" style="padding:9px 0">
+        <div class="check-box ${t.done?'done':''}" onclick="toggleRepair(${t.id})">${t.done?'<i class="ti ti-check" style="font-size:13px"></i>':''}</div>
+        <div style="flex:1;min-width:0">
+          <div class="check-text ${t.done?'done':''}">${t.task}</div>
+          <input type="date" value="${t.date||''}" onchange="setRepairDateVal(${t.id},this.value)" style="font-size:11px;margin-top:3px;padding:3px 6px;border-radius:6px;border:0.5px solid var(--border2);background:var(--bg2);color:${t.date?'var(--blue)':'var(--text3)'};font-family:inherit;-webkit-appearance:none;appearance:none">
+        </div>
+        <span style="font-size:17px;color:var(--text3);cursor:pointer;padding:3px" onclick="deleteRepair(${t.id})"><i class="ti ti-x"></i></span>
+      </div>`).join('')}
+      <div class="check-input-row" style="margin-top:8px">
+        <input id="rep-new-${room.replace(/[^a-zA-Z0-9]/g,'')}" placeholder="Add task to ${room}…" onkeydown="if(event.key==='Enter')addRepairTask('${room.replace(/'/g,"\\'")}')">
+        <button class="btn" style="padding:9px 12px" onclick="addRepairTask('${room.replace(/'/g,"\\'")}')"><i class="ti ti-plus"></i></button>
+      </div>
+    </div>`;
+  });
+  html+=`<button class="btn btn-primary" style="width:100%;justify-content:center;padding:13px;margin-top:4px" onclick="openAddRoom()"><i class="ti ti-plus"></i>Add Room</button>
+    ${roomTemplates.length===0?`<div class="info-box" style="margin-top:12px"><i class="ti ti-info-circle" style="font-size:14px;vertical-align:-2px"></i> Add a <strong>RoomTemplates</strong> tab to your sheet (room, task, order) so rooms auto-fill their repair tasks.</div>`:''}
+  </div>`;
+  body.innerHTML=html;
+}
+
+function openAddRoom(){
+  const rooms=roomList();
+  const sel=document.getElementById('ar-room');
+  sel.innerHTML=rooms.map(r=>`<option>${r}</option>`).join('')+'<option value="__custom">Other (type below)…</option>';
+  document.getElementById('ar-custom').value='';
+  document.getElementById('ar-custom-wrap').style.display=rooms.length?'none':'block';
+  document.getElementById('add-room-modal').classList.add('open');
+}
+function addRoomConfirm(){
+  if(!activeJob)return;
+  let room=document.getElementById('ar-room').value;
+  if(room==='__custom'||!room)room=document.getElementById('ar-custom').value.trim();
+  if(!room){alert('Pick or type a room.');return;}
+  if(!jobRepairs[activeJob.id])jobRepairs[activeJob.id]=[];
+  // Don't duplicate a room already on the job
+  if(jobRepairs[activeJob.id].some(t=>t.room===room)){closeModal('add-room-modal');showToast(room+' already added');return;}
+  const steps=roomTemplates.filter(t=>t.room===room).sort((a,b)=>a.order-b.order);
+  if(steps.length){
+    steps.forEach(s=>jobRepairs[activeJob.id].push({id:repairNextId++,room,task:s.task,done:false,date:'',order:s.order}));
+  }else{
+    // custom room with no template — start with one blank line prompt
+    jobRepairs[activeJob.id].push({id:repairNextId++,room,task:'New task',done:false,date:'',order:1});
+  }
+  closeModal('add-room-modal');
+  scheduleSave();
+  renderRepairsTab(activeJob);
+}
+function toggleRepair(id){
+  const t=jobRepairs[activeJob.id].find(x=>x.id===id);if(t)t.done=!t.done;
+  scheduleSave();renderRepairsTab(activeJob);
+}
+function deleteRepair(id){
+  jobRepairs[activeJob.id]=jobRepairs[activeJob.id].filter(x=>x.id!==id);
+  scheduleSave();renderRepairsTab(activeJob);
+}
+function addRepairTask(room){
+  const inp=document.getElementById('rep-new-'+room.replace(/[^a-zA-Z0-9]/g,''));
+  const text=inp.value.trim();if(!text)return;
+  const maxOrder=Math.max(0,...jobRepairs[activeJob.id].filter(t=>t.room===room).map(t=>t.order));
+  jobRepairs[activeJob.id].push({id:repairNextId++,room,task:text,done:false,date:'',order:maxOrder+1});
+  scheduleSave();renderRepairsTab(activeJob);
+}
+function setRepairDateVal(id,val){
+  const t=jobRepairs[activeJob.id].find(x=>x.id===id);if(!t)return;
+  t.date=val||'';
+  scheduleSave();renderRepairsTab(activeJob);
+  if(document.getElementById('view-schedule').style.display!=='none')renderSchedule();
 }
 
 // ── DATA MUTATIONS ──
@@ -990,6 +1126,24 @@ function showView(v,el){
 // ── SCHEDULE / CALENDAR ──
 const dotColor={water:'var(--blue)',fire:'var(--red)',mold:'var(--teal)',storm:'var(--amber)',other:'var(--text3)'};
 function toISO(d){return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+function addDaysISO(iso,n){const d=new Date((iso||toISO(TODAY))+'T00:00:00');d.setDate(d.getDate()+(parseInt(n)||0));return toISO(d);}
+
+// Tap a template category → create its full task sequence on this job's schedule
+function applyTemplate(cat){
+  if(!activeJob)return;
+  const steps=templates.filter(t=>t.category===cat);
+  if(!steps.length){showToast('No template steps for '+cat);return;}
+  let added=0;
+  steps.forEach(s=>{
+    const base=(s.anchor==='start'&&activeJob.start)?activeJob.start:toISO(TODAY);
+    const date=addDaysISO(base,s.offset);
+    schedItems.push({id:evNextId++,date,time:'',title:s.task,jobName:activeJob.name,notes:cat});
+    added++;
+  });
+  scheduleSave();
+  showToast('Added '+added+' task'+(added!==1?'s':'')+' to schedule ✓');
+  if(document.getElementById('view-schedule').style.display!=='none')renderSchedule();
+}
 function calShift(n){calM+=n;if(calM<0){calM=11;calY--;}if(calM>11){calM=0;calY++;}renderSchedule();}
 function calToday(){calY=TODAY.getFullYear();calM=TODAY.getMonth();calSel=toISO(TODAY);renderSchedule();}
 function calSelect(d){calSel=d;renderSchedule();}
@@ -1000,6 +1154,11 @@ function schedEvents(){
     if(j.closed&&j.closeDate)(ev[j.closeDate]=ev[j.closeDate]||[]).push({j,kind:'done'});
   });
   schedItems.forEach(e=>{(ev[e.date]=ev[e.date]||[]).push({item:e,kind:'event'});});
+  // Repair tasks that have a target date show on the calendar too
+  const jobById={};getAllJobs().forEach(j=>jobById[j.id]=j);
+  Object.entries(jobRepairs).forEach(([jid,arr])=>arr.forEach(t=>{
+    if(t.date){const jn=jobById[jid]?jobById[jid].name:'';(ev[t.date]=ev[t.date]||[]).push({item:{id:t.id,date:t.date,time:'',title:t.task,jobName:jn+(t.room?' · '+t.room:''),notes:'repair'},kind:'event'});}
+  }));
   return ev;
 }
 function schedRow(e){
